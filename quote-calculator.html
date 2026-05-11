@@ -201,7 +201,7 @@ body{
 }
 
 .info-grid{
-  display:grid;grid-template-columns:1fr 1fr;
+  display:grid;grid-template-columns:1fr 1fr 1fr;
   gap:8px;margin-bottom:10px;
 }
 .info-item{
@@ -336,6 +336,10 @@ body{
         <div class="info-value" id="vol-info">—</div>
       </div>
       <div class="info-item">
+        <div class="info-label">필라멘트</div>
+        <div class="info-value" id="fil-info">—</div>
+      </div>
+      <div class="info-item">
         <div class="info-label">예상 출력 시간</div>
         <div class="info-value" id="time-info">—</div>
       </div>
@@ -348,24 +352,37 @@ body{
 </div>
 
 <script>
-/* ──────────────────────────────────────────────
- *  CONFIG — 이 값만 수정하면 견적이 바뀝니다
- * ────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════
+ *  CONFIG — 이 값만 수정하면 견적·시간이 바뀝니다
+ * ══════════════════════════════════════════════════ */
 var CONFIG = {
   CONTACT_EMAIL: "eoulrimstudio@gmail.com",
 
-  MATERIAL_RATE: 40,    // 원/cm³ — PLA 원가(약 16원)에 마진 포함
-  MACHINE_RATE:  25,    // 원/cm³ — 전기료·감가상각·운영비
-  MIN_PRICE:     10000, // 최소 견적금액 (원)
-  RANGE:         0.15,  // 견적 범위 ±15%
+  // ── 가격 설정 ──
+  FILAMENT_RATE:  40,     // 원/cm³ — PLA 재료 단가 (원가 + 마진)
+  MACHINE_RATE:   3000,   // 원/시간 — 기계 가동비 (전기·감가·운영비)
+  MIN_PRICE:      10000,  // 최소 견적금액 (원)
+  RANGE:          0.15,   // 견적 범위 ±15%
 
-  WALL_THICKNESS: 2.5,  // mm — 컵·볼 등 속이 빈 형태의 벽 두께
-  PRINT_SPEED:    30,   // cm³/hour — 유효 재료 부피 기준 출력 속도
+  // ── 뱀부랩 스튜디오 PLA 기본 출력 설정 ──
+  LAYER_HEIGHT:       0.20,  // mm — 레이어 높이 (0.20 표준)
+  LINE_WIDTH:         0.42,  // mm — 압출 선폭 (0.4mm 노즐)
+  PRINT_SPEED:        200,   // mm/s — 뱀부랩 PLA 기본 속도
+  SPEED_EFFICIENCY:   0.50,  // 가감속·코너·리트렉션 감안 실효 속도 비율
+  WALL_COUNT:         2,     // 외벽 수 (퍼리미터)
+  TOP_BOTTOM_LAYERS:  3,     // 상/하면 솔리드 레이어 수
+  LAYER_CHANGE_TIME:  1.5,   // 초 — 레이어 전환 오버헤드
+
+  // ── 형태 설정 ──
+  WALL_THICKNESS:     2.5,   // mm — 컵·볼 등 속이 빈 형태의 벽 두께
+
+  // ── 참고 상수 ──
+  PLA_DENSITY:        1.24,  // g/cm³ — PLA 밀도
 };
 
-/* ──────────────────────────────────────────────
+/* ══════════════════════════════════════════════════
  *  형태별 부피 계산 정의
- * ────────────────────────────────────────────── */
+ * ══════════════════════════════════════════════════ */
 var SHAPES = {
   box: {
     name: "직육면체",
@@ -420,27 +437,27 @@ var SHAPES = {
   }
 };
 
-/* ──────────────────────────────────────────────
+/* ══════════════════════════════════════════════════
  *  DOM & State
- * ────────────────────────────────────────────── */
+ * ══════════════════════════════════════════════════ */
 (function () {
   var $ = function (s) { return document.querySelector(s); };
   var $$ = function (s) { return document.querySelectorAll(s); };
 
-  var dimX     = $("#dim-x");
-  var dimY     = $("#dim-y");
-  var dimZ     = $("#dim-z");
-  var labelX   = $("#label-x");
-  var labelY   = $("#label-y");
-  var labelZ   = $("#label-z");
-  var fieldY   = $("#field-y");
-  var dimGrid  = $("#dim-grid");
-  var infill   = $("#infill");
-  var infillVal = $("#infill-val");
-  var calcBtn  = $("#calc-btn");
+  var dimX       = $("#dim-x");
+  var dimY       = $("#dim-y");
+  var dimZ       = $("#dim-z");
+  var labelX     = $("#label-x");
+  var labelZ     = $("#label-z");
+  var fieldY     = $("#field-y");
+  var dimGrid    = $("#dim-grid");
+  var infill     = $("#infill");
+  var infillVal  = $("#infill-val");
+  var calcBtn    = $("#calc-btn");
   var resultCard = $("#result-card");
   var priceValue = $("#price-value");
   var volInfo    = $("#vol-info");
+  var filInfo    = $("#fil-info");
   var timeInfo   = $("#time-info");
   var contactBtn = $("#contact-btn");
 
@@ -462,7 +479,6 @@ var SHAPES = {
     var shape = SHAPES[currentShape];
     labelX.textContent = shape.labels[0];
     labelZ.textContent = shape.labels[2];
-
     if (shape.useY) {
       fieldY.classList.remove("hidden");
       dimGrid.classList.remove("two-fields");
@@ -485,14 +501,14 @@ var SHAPES = {
   updateSliderTrack();
 
   /* ── Validation ── */
-  function clearError(fieldId) {
-    var f = $("#" + fieldId);
+  function clearError(fid) {
+    var f = $("#" + fid);
     f.classList.remove("has-error");
     f.querySelector(".error-msg").textContent = "";
   }
 
-  function validateField(input, fieldId) {
-    var f = $("#" + fieldId);
+  function validateField(input, fid) {
+    var f = $("#" + fid);
     var err = f.querySelector(".error-msg");
     var v = parseFloat(input.value);
     if (!input.value || isNaN(v) || v <= 0) {
@@ -516,11 +532,74 @@ var SHAPES = {
   function ceil(n, u) { return Math.ceil(n / u) * u; }
 
   function formatTime(minutes) {
-    if (minutes < 60) return "약 " + Math.round(minutes) + "분";
+    if (minutes < 60) return "약 " + Math.max(1, Math.round(minutes)) + "분";
     var h = Math.floor(minutes / 60);
     var m = Math.round(minutes % 60);
     if (m < 5) return "약 " + h + "시간";
     return "약 " + h + "시간 " + m + "분";
+  }
+
+  /* ══════════════════════════════════════════════
+   *  핵심 계산 — 뱀부랩 체적 유량 모델
+   * ══════════════════════════════════════════════ */
+  function calcEffectiveFill(shapeKey, x, y, z, infPct) {
+    var shape = SHAPES[shapeKey];
+    var lineW     = CONFIG.LINE_WIDTH;
+    var wallThick = CONFIG.WALL_COUNT * lineW;
+    var tbThick   = CONFIG.TOP_BOTTOM_LAYERS * CONFIG.LAYER_HEIGHT;
+
+    if (shape.solid) {
+      var wallFrac, tbFrac;
+      if (shapeKey === "box") {
+        wallFrac = Math.min(1, 2 * (x + y) * wallThick / (x * y));
+      } else {
+        wallFrac = Math.min(1, 4 * wallThick / x);
+      }
+      tbFrac = Math.min(1, 2 * tbThick / z);
+      var solidFrac = Math.min(1, wallFrac + tbFrac);
+      return solidFrac + (1 - solidFrac) * infPct / 100;
+    }
+
+    var W = CONFIG.WALL_THICKNESS;
+    var perimCount = Math.floor(W / lineW);
+    var perimFrac  = Math.min(1, perimCount * lineW / W);
+    return perimFrac + (1 - perimFrac) * infPct / 100;
+  }
+
+  function estimate(shapeKey, x, y, z, infPct) {
+    var shape    = SHAPES[shapeKey];
+    var volCm3   = shape.volume(x, y, z);
+    var effFill  = calcEffectiveFill(shapeKey, x, y, z, infPct);
+    var matCm3   = volCm3 * effFill;
+    var matMm3   = matCm3 * 1000;
+
+    var flowRate = CONFIG.LINE_WIDTH
+                 * CONFIG.LAYER_HEIGHT
+                 * CONFIG.PRINT_SPEED
+                 * CONFIG.SPEED_EFFICIENCY;
+
+    var extrudeSec   = matMm3 / flowRate;
+    var numLayers    = Math.ceil(z / CONFIG.LAYER_HEIGHT);
+    var layerSec     = numLayers * CONFIG.LAYER_CHANGE_TIME;
+    var totalMin     = (extrudeSec + layerSec) / 60;
+
+    var materialCost = matCm3 * CONFIG.FILAMENT_RATE;
+    var machineCost  = (totalMin / 60) * CONFIG.MACHINE_RATE;
+    var subtotal     = materialCost + machineCost;
+    if (subtotal < CONFIG.MIN_PRICE) subtotal = CONFIG.MIN_PRICE;
+
+    var low  = ceil(subtotal * (1 - CONFIG.RANGE), 1000);
+    var high = ceil(subtotal * (1 + CONFIG.RANGE), 1000);
+    if (low < CONFIG.MIN_PRICE) low = CONFIG.MIN_PRICE;
+
+    return {
+      volCm3:     volCm3,
+      matCm3:     matCm3,
+      filGrams:   matCm3 * CONFIG.PLA_DENSITY,
+      printMin:   totalMin,
+      low:        low,
+      high:       high
+    };
   }
 
   /* ── Calculate ── */
@@ -539,34 +618,17 @@ var SHAPES = {
     var z   = parseFloat(dimZ.value);
     var inf = parseFloat(infill.value);
 
-    var volumeCm3 = shape.volume(x, y, z);
+    var r = estimate(currentShape, x, y, z, inf);
 
-    /* 가격 */
-    var materialCost = volumeCm3 * (inf / 100) * CONFIG.MATERIAL_RATE;
-    var machineCost  = volumeCm3 * CONFIG.MACHINE_RATE;
-    var subtotal     = materialCost + machineCost;
-    if (subtotal < CONFIG.MIN_PRICE) subtotal = CONFIG.MIN_PRICE;
+    priceValue.textContent = "약 " + fmt(r.low) + "원 ~ " + fmt(r.high) + "원";
+    volInfo.textContent    = r.volCm3.toFixed(1) + " cm³";
+    filInfo.textContent    = Math.round(r.filGrams) + "g";
+    timeInfo.textContent   = formatTime(r.printMin);
 
-    var low  = ceil(subtotal * (1 - CONFIG.RANGE), 1000);
-    var high = ceil(subtotal * (1 + CONFIG.RANGE), 1000);
-    if (low < CONFIG.MIN_PRICE) low = CONFIG.MIN_PRICE;
-
-    /* 시간 */
-    var timeFactor = shape.solid
-      ? (0.3 + 0.7 * inf / 100)
-      : (0.8 + 0.2 * inf / 100);
-    var effectiveVol = volumeCm3 * timeFactor;
-    var printMinutes = effectiveVol / CONFIG.PRINT_SPEED * 60;
-
-    /* 결과 표시 */
-    priceValue.textContent = "약 " + fmt(low) + "원 ~ " + fmt(high) + "원";
-    volInfo.textContent  = volumeCm3.toFixed(1) + " cm³";
-    timeInfo.textContent = formatTime(printMinutes);
-
-    /* 이메일 본문 */
     var sizeText = shape.useY
       ? (x + " × " + y + " × " + z + " mm")
       : ("지름 " + x + " × 높이 " + z + " mm");
+
     contactBtn.href = "mailto:" + CONFIG.CONTACT_EMAIL
       + "?subject=3D 프린팅 견적 문의"
       + "&body=" + encodeURIComponent(
@@ -574,9 +636,10 @@ var SHAPES = {
         + "- 형태: " + shape.name + "\n"
         + "- 크기: " + sizeText + "\n"
         + "- 채움율: " + inf + "%\n"
-        + "- 추정 부피: " + volumeCm3.toFixed(1) + " cm³\n"
-        + "- 예상 출력 시간: " + formatTime(printMinutes) + "\n"
-        + "- 예상 견적: " + fmt(low) + "원 ~ " + fmt(high) + "원\n\n"
+        + "- 추정 부피: " + r.volCm3.toFixed(1) + " cm³\n"
+        + "- 필라멘트: " + Math.round(r.filGrams) + "g\n"
+        + "- 예상 출력 시간: " + formatTime(r.printMin) + "\n"
+        + "- 예상 견적: " + fmt(r.low) + "원 ~ " + fmt(r.high) + "원\n\n"
         + "상세 상담 부탁드립니다."
       );
 
