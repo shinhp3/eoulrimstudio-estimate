@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D 프린팅 견적 계산기 — 어울,림 Eoulrimstudio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#f4f5f7;
+  --bg-card:#ffffff;
+  --accent:#1a2332;
+  --accent-hover:#2a3a52;
+  --primary:#3b82f6;
+  --primary-hover:#2563eb;
+  --text:#1e293b;
+  --text-mid:#4a5568;
+  --text-light:#94a3b8;
+  --border:#e5e7eb;
+  --border-focus:#93c5fd;
+  --error:#ef4444;
+  --shadow:0 1px 3px rgba(0,0,0,.04),0 4px 20px rgba(0,0,0,.03);
+  --radius:12px;
+}
+
+html{font-size:15px}
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  padding:28px 16px 52px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+.wrapper{width:100%;max-width:640px}
+
+/* ── Header ── */
+.header{text-align:center;margin-bottom:24px}
+.header h1{
+  font-size:1.35rem;font-weight:700;color:var(--accent);
+  letter-spacing:-.02em;margin-bottom:2px;
+}
+.header .subtitle{font-size:.8rem;color:var(--text-light);font-weight:300}
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--accent);color:#fff;
+  font-size:.65rem;font-weight:600;letter-spacing:.04em;
+  padding:3px 10px;border-radius:20px;margin-bottom:10px;
+}
+.badge::before{content:"◆";font-size:.45rem;opacity:.6}
+
+/* ── Card ── */
+.card{
+  background:var(--bg-card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:24px 22px;
+  margin-bottom:16px;
+  border:1px solid var(--border);
+}
+.section-title{
+  font-size:.8rem;font-weight:600;color:var(--accent);
+  margin-bottom:12px;
+}
+.section-title+.section-title{margin-top:20px}
+.divider{
+  border:none;border-top:1px solid var(--border);
+  margin:18px 0;
+}
+
+/* ── Shape Selector ── */
+.shape-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;margin-bottom:6px;
+}
+.shape-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:10px 4px 8px;
+  border:1.5px solid var(--border);border-radius:10px;
+  background:#fff;cursor:pointer;
+  font-family:inherit;font-size:.68rem;font-weight:500;
+  color:var(--text-mid);
+  transition:all .18s ease;
+}
+.shape-btn:hover{border-color:#cbd5e1;background:#f8fafc}
+.shape-btn.active{
+  border-color:var(--accent);background:var(--accent);color:#fff;
+}
+.shape-btn.active:hover{background:var(--accent-hover)}
+.shape-btn svg{
+  width:22px;height:22px;
+  stroke:currentColor;fill:none;
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+}
+
+/* ── Form Fields ── */
+.dim-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;margin-bottom:6px;
+}
+.dim-grid.two-fields{grid-template-columns:1fr 1fr}
+
+.field{display:flex;flex-direction:column;gap:3px;position:relative}
+.field.hidden{display:none}
+.field label{font-size:.72rem;font-weight:500;color:var(--text-mid)}
+.field input[type="number"]{
+  width:100%;padding:8px 34px 8px 10px;
+  border:1.5px solid var(--border);border-radius:8px;
+  font-size:.9rem;font-family:inherit;color:var(--text);
+  background:#fff;transition:border-color .2s;
+  -moz-appearance:textfield;
+}
+.field input[type="number"]::-webkit-inner-spin-button,
+.field input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.field input:focus{outline:none;border-color:var(--border-focus)}
+.field .unit{
+  position:absolute;right:10px;bottom:24px;
+  font-size:.72rem;color:var(--text-light);pointer-events:none;
+}
+.field.has-error input{border-color:var(--error)}
+.field .error-msg{
+  font-size:.65rem;color:var(--error);
+  min-height:14px;
+}
+
+/* ── Slider ── */
+.slider-section{margin-top:2px}
+.slider-row{display:flex;align-items:center;gap:12px;margin-top:4px}
+.slider-row input[type="range"]{
+  flex:1;-webkit-appearance:none;appearance:none;
+  height:5px;border-radius:3px;
+  background:linear-gradient(to right,var(--accent) 0%,var(--border) 0%);
+  outline:none;cursor:pointer;
+}
+.slider-row input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;
+  border-radius:50%;background:var(--accent);
+  border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15);
+  cursor:pointer;transition:transform .12s;
+}
+.slider-row input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.12)}
+.slider-row input[type="range"]::-moz-range-thumb{
+  width:18px;height:18px;border-radius:50%;
+  background:var(--accent);border:2.5px solid #fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.15);cursor:pointer;
+}
+.slider-val{
+  min-width:42px;text-align:center;
+  font-size:.88rem;font-weight:600;color:var(--accent);
+}
+.infill-note{
+  font-size:.66rem;color:var(--text-light);
+  line-height:1.6;margin-top:8px;
+  padding:8px 10px;
+  background:#f8fafc;border-radius:6px;
+  border-left:2.5px solid var(--border);
+}
+
+/* ── Button ── */
+.btn{
+  display:block;width:100%;
+  padding:11px 16px;margin-top:10px;
+  border:none;border-radius:8px;cursor:pointer;
+  font-family:inherit;font-size:.85rem;font-weight:600;
+  transition:background .2s,transform .08s;
+  text-align:center;text-decoration:none;
+}
+.btn:active{transform:scale(.985)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-contact{
+  background:var(--primary);color:#fff;margin-top:14px;
+}
+.btn-contact:hover{background:var(--primary-hover)}
+
+/* ── Result ── */
+.result-card{
+  opacity:0;transform:translateY(10px);
+  pointer-events:none;
+  transition:opacity .4s ease,transform .4s ease;
+}
+.result-card.visible{
+  opacity:1;transform:translateY(0);pointer-events:auto;
+}
+
+.price-display{text-align:center;padding:14px 0 10px}
+.price-label{font-size:.75rem;color:var(--text-light);margin-bottom:4px}
+.price-value{
+  font-size:1.4rem;font-weight:700;color:var(--accent);
+  letter-spacing:-.02em;line-height:1.3;
+}
+
+.info-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:8px;margin-bottom:10px;
+}
+.info-item{
+  text-align:center;padding:10px 8px;
+  background:#f8fafc;border-radius:8px;
+}
+.info-item .info-label{
+  font-size:.65rem;color:var(--text-light);margin-bottom:2px;
+}
+.info-item .info-value{
+  font-size:.88rem;font-weight:600;color:var(--text);
+}
+
+.disclaimer{
+  font-size:.66rem;color:var(--text-light);
+  text-align:center;line-height:1.7;
+  border-top:1px solid var(--border);
+  padding-top:12px;margin-top:6px;
+}
+
+/* ── Footer ── */
+.footer{
+  text-align:center;font-size:.65rem;color:var(--text-light);
+  margin-top:8px;opacity:.5;
+}
+
+/* ── Desktop ── */
+@media(min-width:641px){
+  .btn{max-width:320px;margin-left:auto;margin-right:auto}
+  .btn-contact{max-width:280px}
+}
+
+/* ── Mobile ── */
+@media(max-width:480px){
+  body{padding:16px 12px 40px}
+  .card{padding:20px 16px}
+  .shape-grid{grid-template-columns:repeat(3,1fr)}
+  .dim-grid{grid-template-columns:1fr}
+  .dim-grid.two-fields{grid-template-columns:1fr}
+  .info-grid{grid-template-columns:1fr}
+  .header h1{font-size:1.2rem}
+  .price-value{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="header">
+    <span class="badge">PLA 소재 전용</span>
+    <h1>3D 프린팅 견적 계산기</h1>
+    <p class="subtitle">어울,림 Eoulrimstudio</p>
+  </div>
+
+  <!-- 입력 카드 -->
+  <div class="card">
+    <div class="section-title">형태 선택</div>
+    <div class="shape-grid" id="shape-grid">
+      <button class="shape-btn active" data-shape="box" type="button">
+        <svg viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z"/><path d="M3 7l9 5 9-5"/><path d="M12 12v10"/></svg>
+        <span>직육면체</span>
+      </button>
+      <button class="shape-btn" data-shape="cylinder" type="button">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/></svg>
+        <span>원기둥</span>
+      </button>
+      <button class="shape-btn" data-shape="cup" type="button">
+        <svg viewBox="0 0 24 24"><path d="M5 3h14v13c0 2.2-2.7 4-7 4s-7-1.8-7-4V3z"/><path d="M19 7h1.5a2.5 2.5 0 0 1 0 5H19"/></svg>
+        <span>컵</span>
+      </button>
+      <button class="shape-btn" data-shape="plate" type="button">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="10" ry="3.5"/><path d="M2 15c0-3 4.5-5.5 10-5.5s10 2.5 10 5.5"/></svg>
+        <span>접시</span>
+      </button>
+      <button class="shape-btn" data-shape="bowl" type="button">
+        <svg viewBox="0 0 24 24"><path d="M2 10c0 5.5 4.5 10 10 10s10-4.5 10-10"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <span>볼/그릇</span>
+      </button>
+    </div>
+
+    <hr class="divider">
+
+    <div class="section-title">치수 입력</div>
+    <div class="dim-grid" id="dim-grid">
+      <div class="field" id="field-x">
+        <label for="dim-x" id="label-x">가로 (X)</label>
+        <input type="number" id="dim-x" min="1" placeholder="0" inputmode="numeric">
+        <span class="unit">mm</span>
+        <span class="error-msg"></span>
+      </div>
+      <div class="field" id="field-y">
+        <label for="dim-y" id="label-y">세로 (Y)</label>
+        <input type="number" id="dim-y" min="1" placeholder="0" inputmode="numeric">
+        <span class="unit">mm</span>
+        <span class="error-msg"></span>
+      </div>
+      <div class="field" id="field-z">
+        <label for="dim-z" id="label-z">높이 (Z)</label>
+        <input type="number" id="dim-z" min="1" placeholder="0" inputmode="numeric">
+        <span class="unit">mm</span>
+        <span class="error-msg"></span>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="slider-section">
+      <div class="section-title">채움율 (Infill)</div>
+      <div class="slider-row">
+        <input type="range" id="infill" min="5" max="100" value="15" step="1">
+        <span class="slider-val" id="infill-val">15%</span>
+      </div>
+      <p class="infill-note">
+        기본 15% 권장. 5%까지 낮추면 시간·비용을 절감할 수 있으나,
+        채움율이 낮을수록 내구성이 떨어질 수 있습니다.
+      </p>
+    </div>
+
+    <button class="btn btn-primary" id="calc-btn" type="button">견적 계산하기</button>
+  </div>
+
+  <!-- 결과 카드 -->
+  <div class="card result-card" id="result-card">
+    <div class="section-title">예상 견적</div>
+    <div class="price-display">
+      <div class="price-label">예상 금액 범위</div>
+      <div class="price-value" id="price-value"></div>
+    </div>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">추정 부피</div>
+        <div class="info-value" id="vol-info">—</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">예상 출력 시간</div>
+        <div class="info-value" id="time-info">—</div>
+      </div>
+    </div>
+    <a class="btn btn-contact" id="contact-btn" href="#">견적 문의하기</a>
+    <p class="disclaimer">본 견적은 참고용이며 실제 가격은 상담 후 확정됩니다.<br>형상 복잡도·서포트 구조에 따라 달라질 수 있습니다.</p>
+  </div>
+
+  <p class="footer">© 어울,림 Eoulrimstudio</p>
+</div>
+
+<script>
+/* ──────────────────────────────────────────────
+ *  CONFIG — 이 값만 수정하면 견적이 바뀝니다
+ * ────────────────────────────────────────────── */
+var CONFIG = {
+  CONTACT_EMAIL: "eoulrimstudio@gmail.com",
+
+  MATERIAL_RATE: 40,    // 원/cm³ — PLA 원가(약 16원)에 마진 포함
+  MACHINE_RATE:  25,    // 원/cm³ — 전기료·감가상각·운영비
+  MIN_PRICE:     10000, // 최소 견적금액 (원)
+  RANGE:         0.15,  // 견적 범위 ±15%
+
+  WALL_THICKNESS: 2.5,  // mm — 컵·볼 등 속이 빈 형태의 벽 두께
+  PRINT_SPEED:    30,   // cm³/hour — 유효 재료 부피 기준 출력 속도
+};
+
+/* ──────────────────────────────────────────────
+ *  형태별 부피 계산 정의
+ * ────────────────────────────────────────────── */
+var SHAPES = {
+  box: {
+    name: "직육면체",
+    labels: ["가로 (X)", "세로 (Y)", "높이 (Z)"],
+    useY: true,
+    solid: true,
+    volume: function (x, y, z) {
+      return x * y * z / 1000;
+    }
+  },
+  cylinder: {
+    name: "원기둥",
+    labels: ["지름 (D)", null, "높이 (H)"],
+    useY: false,
+    solid: true,
+    volume: function (d, _, h) {
+      return Math.PI / 4 * d * d * h / 1000;
+    }
+  },
+  cup: {
+    name: "컵",
+    labels: ["외경 (D)", null, "높이 (H)"],
+    useY: false,
+    solid: false,
+    volume: function (d, _, h) {
+      var R = d / 2, W = CONFIG.WALL_THICKNESS;
+      var r = Math.max(R - W, 0);
+      if (r <= 0 || h <= W) return Math.PI * R * R * h / 1000;
+      var bottom = Math.PI * R * R * W;
+      var walls  = Math.PI * (R * R - r * r) * (h - W);
+      return (bottom + walls) / 1000;
+    }
+  },
+  plate: {
+    name: "접시",
+    labels: ["지름 (D)", null, "두께 (H)"],
+    useY: false,
+    solid: true,
+    volume: function (d, _, h) {
+      return Math.PI / 4 * d * d * h / 1000;
+    }
+  },
+  bowl: {
+    name: "볼/그릇",
+    labels: ["지름 (D)", null, "깊이 (H)"],
+    useY: false,
+    solid: false,
+    volume: function (d, _, h) {
+      var W = CONFIG.WALL_THICKNESS;
+      return Math.PI * (d * d / 4 + h * h) * W / 1000;
+    }
+  }
+};
+
+/* ──────────────────────────────────────────────
+ *  DOM & State
+ * ────────────────────────────────────────────── */
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var $$ = function (s) { return document.querySelectorAll(s); };
+
+  var dimX     = $("#dim-x");
+  var dimY     = $("#dim-y");
+  var dimZ     = $("#dim-z");
+  var labelX   = $("#label-x");
+  var labelY   = $("#label-y");
+  var labelZ   = $("#label-z");
+  var fieldY   = $("#field-y");
+  var dimGrid  = $("#dim-grid");
+  var infill   = $("#infill");
+  var infillVal = $("#infill-val");
+  var calcBtn  = $("#calc-btn");
+  var resultCard = $("#result-card");
+  var priceValue = $("#price-value");
+  var volInfo    = $("#vol-info");
+  var timeInfo   = $("#time-info");
+  var contactBtn = $("#contact-btn");
+
+  var currentShape = "box";
+
+  contactBtn.href = "mailto:" + CONFIG.CONTACT_EMAIL + "?subject=3D 프린팅 견적 문의";
+
+  /* ── Shape switching ── */
+  $$(".shape-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      $$(".shape-btn").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      currentShape = btn.dataset.shape;
+      applyShape();
+    });
+  });
+
+  function applyShape() {
+    var shape = SHAPES[currentShape];
+    labelX.textContent = shape.labels[0];
+    labelZ.textContent = shape.labels[2];
+
+    if (shape.useY) {
+      fieldY.classList.remove("hidden");
+      dimGrid.classList.remove("two-fields");
+    } else {
+      fieldY.classList.add("hidden");
+      dimGrid.classList.add("two-fields");
+      clearError("field-y");
+    }
+    resultCard.classList.remove("visible");
+  }
+
+  /* ── Slider ── */
+  function updateSliderTrack() {
+    var pct = ((infill.value - infill.min) / (infill.max - infill.min)) * 100;
+    infill.style.background =
+      "linear-gradient(to right, var(--accent) " + pct + "%, var(--border) " + pct + "%)";
+    infillVal.textContent = infill.value + "%";
+  }
+  infill.addEventListener("input", updateSliderTrack);
+  updateSliderTrack();
+
+  /* ── Validation ── */
+  function clearError(fieldId) {
+    var f = $("#" + fieldId);
+    f.classList.remove("has-error");
+    f.querySelector(".error-msg").textContent = "";
+  }
+
+  function validateField(input, fieldId) {
+    var f = $("#" + fieldId);
+    var err = f.querySelector(".error-msg");
+    var v = parseFloat(input.value);
+    if (!input.value || isNaN(v) || v <= 0) {
+      f.classList.add("has-error");
+      err.textContent = "1 이상의 값을 입력하세요";
+      return false;
+    }
+    f.classList.remove("has-error");
+    err.textContent = "";
+    return true;
+  }
+
+  [dimX, dimY, dimZ].forEach(function (el) {
+    el.addEventListener("input", function () {
+      if (el.value) validateField(el, el.closest(".field").id);
+    });
+  });
+
+  /* ── Helpers ── */
+  function fmt(n) { return Math.round(n).toLocaleString("ko-KR"); }
+  function ceil(n, u) { return Math.ceil(n / u) * u; }
+
+  function formatTime(minutes) {
+    if (minutes < 60) return "약 " + Math.round(minutes) + "분";
+    var h = Math.floor(minutes / 60);
+    var m = Math.round(minutes % 60);
+    if (m < 5) return "약 " + h + "시간";
+    return "약 " + h + "시간 " + m + "분";
+  }
+
+  /* ── Calculate ── */
+  calcBtn.addEventListener("click", function () {
+    var shape = SHAPES[currentShape];
+    var vx = validateField(dimX, "field-x");
+    var vy = shape.useY ? validateField(dimY, "field-y") : true;
+    var vz = validateField(dimZ, "field-z");
+    if (!vx || !vy || !vz) {
+      resultCard.classList.remove("visible");
+      return;
+    }
+
+    var x   = parseFloat(dimX.value);
+    var y   = shape.useY ? parseFloat(dimY.value) : 0;
+    var z   = parseFloat(dimZ.value);
+    var inf = parseFloat(infill.value);
+
+    var volumeCm3 = shape.volume(x, y, z);
+
+    /* 가격 */
+    var materialCost = volumeCm3 * (inf / 100) * CONFIG.MATERIAL_RATE;
+    var machineCost  = volumeCm3 * CONFIG.MACHINE_RATE;
+    var subtotal     = materialCost + machineCost;
+    if (subtotal < CONFIG.MIN_PRICE) subtotal = CONFIG.MIN_PRICE;
+
+    var low  = ceil(subtotal * (1 - CONFIG.RANGE), 1000);
+    var high = ceil(subtotal * (1 + CONFIG.RANGE), 1000);
+    if (low < CONFIG.MIN_PRICE) low = CONFIG.MIN_PRICE;
+
+    /* 시간 */
+    var timeFactor = shape.solid
+      ? (0.3 + 0.7 * inf / 100)
+      : (0.8 + 0.2 * inf / 100);
+    var effectiveVol = volumeCm3 * timeFactor;
+    var printMinutes = effectiveVol / CONFIG.PRINT_SPEED * 60;
+
+    /* 결과 표시 */
+    priceValue.textContent = "약 " + fmt(low) + "원 ~ " + fmt(high) + "원";
+    volInfo.textContent  = volumeCm3.toFixed(1) + " cm³";
+    timeInfo.textContent = formatTime(printMinutes);
+
+    /* 이메일 본문 */
+    var sizeText = shape.useY
+      ? (x + " × " + y + " × " + z + " mm")
+      : ("지름 " + x + " × 높이 " + z + " mm");
+    contactBtn.href = "mailto:" + CONFIG.CONTACT_EMAIL
+      + "?subject=3D 프린팅 견적 문의"
+      + "&body=" + encodeURIComponent(
+        "안녕하세요, 3D 프린팅 견적 문의드립니다.\n\n"
+        + "- 형태: " + shape.name + "\n"
+        + "- 크기: " + sizeText + "\n"
+        + "- 채움율: " + inf + "%\n"
+        + "- 추정 부피: " + volumeCm3.toFixed(1) + " cm³\n"
+        + "- 예상 출력 시간: " + formatTime(printMinutes) + "\n"
+        + "- 예상 견적: " + fmt(low) + "원 ~ " + fmt(high) + "원\n\n"
+        + "상세 상담 부탁드립니다."
+      );
+
+    resultCard.classList.remove("visible");
+    void resultCard.offsetHeight;
+    resultCard.classList.add("visible");
+  });
+})();
+</script>
+</body>
+</html>
