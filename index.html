@@ -1272,15 +1272,53 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
   function handleKakaoClick(e){
     e.preventDefault();
 
-    if(lastResult){
-      buildQuoteImage(function(blob){
-        downloadBlob(blob);
-        showToast("견적서 이미지가 저장되었습니다. 채팅에서 첨부해주세요!");
-      });
+    if(!lastResult){
+      if(window.Kakao && Kakao.isInitialized()){
+        Kakao.Channel.chat({ channelPublicId: "_ACNxon" });
+      } else {
+        window.open(CONFIG.KAKAO_CHANNEL+"/chat", "_blank");
+      }
+      return;
     }
 
+    var mc = getModelingCost();
+    var needsModeling = selectedTier!=="none" && selectedTier!=="custom";
+    var isCustom = selectedTier==="custom";
+    var totalText;
+
+    if(isCustom){
+      totalText = "추후 협의";
+    } else {
+      totalText = fmt(mc.fee + lastResult.low)+"원 ~ "+fmt(mc.fee + lastResult.high)+"원";
+    }
+
+    var descParts = [];
+    if(needsModeling) descParts.push("모델링: "+fmt(mc.fee)+"원");
+    descParts.push("출력: "+fmt(lastResult.low)+"~"+fmt(lastResult.high)+"원");
+    descParts.push("부피: "+lastResult.volCm3.toFixed(1)+"cm³");
+    descParts.push("필라멘트: "+Math.round(lastResult.filGrams)+"g");
+    descParts.push("출력시간: "+formatTime(lastResult.printMin));
+
     if(window.Kakao && Kakao.isInitialized()){
-      Kakao.Channel.chat({ channelPublicId: "_ACNxon" });
+      Kakao.Share.sendDefault({
+        objectType: "feed",
+        content: {
+          title: "3D 프린팅 견적서 — 어울,림",
+          description: "예상 금액: "+totalText+"\n"+descParts.join("\n"),
+          imageUrl: "https://shinhp3.github.io/eoulrimstudio-estimate/og-image.png",
+          link: {
+            mobileWebUrl: "https://shinhp3.github.io/eoulrimstudio-estimate/",
+            webUrl: "https://shinhp3.github.io/eoulrimstudio-estimate/"
+          }
+        },
+        buttons: [{
+          title: "견적서 확인하기",
+          link: {
+            mobileWebUrl: "https://shinhp3.github.io/eoulrimstudio-estimate/",
+            webUrl: "https://shinhp3.github.io/eoulrimstudio-estimate/"
+          }
+        }]
+      });
     } else {
       window.open(CONFIG.KAKAO_CHANNEL+"/chat", "_blank");
     }
