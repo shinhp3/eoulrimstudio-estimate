@@ -6,7 +6,7 @@
 <title>3D 프린팅 견적 계산기 — 어울,림 Eoulrimstudio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script type="importmap">
 {
@@ -18,15 +18,33 @@
 </script>
 </head>
 <body>
+
+<!-- Navigation -->
+<nav class="navbar">
+  <a class="navbar-brand" href="#">
+    <div class="navbar-logo-mark">
+      <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 2L3 6v8l7 4 7-4V6L10 2z"/>
+        <path d="M10 2v12M3 6l7 4 7-4"/>
+      </svg>
+    </div>
+    <span class="navbar-name">어울,림 <span>Eoulrimstudio</span></span>
+  </a>
+  <span class="navbar-pill">견적 계산기</span>
+</nav>
+
 <div class="wrapper">
 
+  <!-- Header -->
   <div class="header">
-    <span class="badge">PLA 소재 전용</span>
-    <h1>3D 프린팅<br>견적 계산기</h1>
-    <p class="subtitle">어울,림 Eoulrimstudio</p>
+    <div class="header-eyebrow">
+      <span class="badge">PLA 소재 전용</span>
+    </div>
+    <h1><em>3D 프린팅</em><br>견적 계산기</h1>
+    <p class="subtitle">치수 또는 STL 파일로 <strong>즉시 출력 비용을 확인</strong>하세요.</p>
   </div>
 
-  <!-- 모델링 단계 선택 -->
+  <!-- STEP 1 : 모델링 여부 -->
   <div class="card">
     <div class="section-title">3D 모델링이 필요하신가요?</div>
     <div class="tier-grid" id="tier-grid">
@@ -58,7 +76,7 @@
     </div>
   </div>
 
-  <!-- 입력 모드 탭 -->
+  <!-- STEP 2 : 입력 방식 -->
   <div class="tab-bar">
     <button class="tab-btn active" data-tab="manual" type="button">수동 입력</button>
     <button class="tab-btn" data-tab="stl" type="button">STL 파일 업로드</button>
@@ -117,13 +135,13 @@
   <div class="card tab-panel hidden" id="panel-stl">
     <div class="section-title">STL 파일</div>
     <div class="stl-dropzone" id="stl-dropzone">
-      <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
         <polyline points="17 8 12 3 7 8"/>
         <line x1="12" y1="3" x2="12" y2="15"/>
       </svg>
       <p class="dropzone-text">STL 파일을 여기에 드롭하거나 클릭해 선택</p>
-      <p class="dropzone-hint">.stl 파일만 지원</p>
+      <p class="dropzone-hint">.stl 파일만 지원됩니다</p>
       <input type="file" id="stl-input" accept=".stl" hidden>
     </div>
     <div class="stl-file-info hidden" id="stl-file-info">
@@ -131,7 +149,7 @@
       <button class="stl-remove-btn" id="stl-remove-btn" type="button">✕ 제거</button>
     </div>
 
-    <!-- 3D 뷰어 -->
+    <!-- 3D Viewer -->
     <div class="viewer-container hidden" id="viewer-container">
       <canvas id="stl-viewer"></canvas>
       <div class="viewer-info" id="viewer-info"></div>
@@ -152,14 +170,15 @@
     </div>
   </div>
 
-  <!-- 결과 카드 -->
+  <!-- STEP 3 : 결과 -->
   <div class="card result-card" id="result-card">
     <div class="section-title">예상 견적</div>
 
-    <!-- 모델링+출력 합산 (모델 없을 때) — 계산기 스타일 -->
+    <!-- 모델링 포함 계산 -->
     <div class="calc-display hidden" id="price-breakdown">
       <div class="calc-screen">
         <div class="calc-line-item">
+          <span class="calc-line-op">&nbsp;</span>
           <span class="calc-line-label">모델링</span>
           <span class="calc-line-amount" id="modeling-price">—</span>
         </div>
@@ -170,12 +189,13 @@
         </div>
         <div class="calc-separator"></div>
         <div class="calc-total-row">
+          <span class="calc-total-label">합계</span>
           <span class="calc-total-amount" id="total-price">—</span>
         </div>
       </div>
     </div>
 
-    <!-- 출력만 (모델 있을 때) -->
+    <!-- 출력만 (모델 보유) -->
     <div class="price-display" id="price-display-simple">
       <div class="price-label">예상 출력 비용</div>
       <div class="price-value" id="price-value"></div>
@@ -210,10 +230,10 @@
       </div>
     </div>
     <a class="btn btn-contact" id="contact-btn" href="#">견적 문의하기</a>
-    <p class="disclaimer">본 견적은 참고용이며 실제 가격은 상담 후 확정됩니다.<br>형상 복잡도·서포트 구조에 따라 달라질 수 있습니다.</p>
+    <p class="disclaimer">본 견적은 참고용이며 실제 가격은 상담 후 확정됩니다.<br>형상 복잡도 및 서포트 구조에 따라 달라질 수 있습니다.</p>
   </div>
 
-  <p class="footer">© 어울,림 Eoulrimstudio</p>
+  <p class="footer">© 어울,림 Eoulrimstudio. All rights reserved.</p>
 </div>
 
 <script>
@@ -236,7 +256,6 @@ var CONFIG = {
   WALL_THICKNESS:     2.5,
   PLA_DENSITY:        1.24,
 
-  // ── 모델링 비용 (메뉴판 기준) ──
   MODELING: {
     none:     { fee: 0,      label: "모델 보유" },
     lite:     { fee: 50000,  label: "Lite (단순)" },
@@ -327,9 +346,7 @@ var SHAPES = {
       $$(".tier-btn").forEach(function (b) { b.classList.remove("active"); });
       btn.classList.add("active");
       selectedTier = btn.dataset.tier;
-      if (lastResult) {
-        renderResult();
-      }
+      if (lastResult) { renderResult(); }
     });
   });
 
@@ -468,7 +485,7 @@ var SHAPES = {
     return { volCm3: volCm3, matCm3: matCm3, filGrams: matCm3 * CONFIG.PLA_DENSITY, printMin: totalMin, low: low, high: high };
   }
 
-  /* ── STL 견적 계산 (부피 mm³ → cm³ 기반) ── */
+  /* ── STL 견적 계산 ── */
   window.estimateFromSTL = function (volMm3, bbox, infPct) {
     var volCm3 = volMm3 / 1000;
     var z = bbox.z;
@@ -543,16 +560,13 @@ var SHAPES = {
     }, 350);
   }
 
-  /* ── 모델링 비용 (선택된 tier 기반) ── */
   function getModelingCost() {
     return CONFIG.MODELING[selectedTier] || CONFIG.MODELING.none;
   }
 
-  /* ── 마지막 계산 결과 저장 (옵션 변경 시 재계산용) ── */
   var lastResult = null;
   var lastExtra  = null;
 
-  /* ── 결과 표시 공통 함수 ── */
   window.showResult = function (r, extra) {
     lastResult = r;
     lastExtra  = extra;
@@ -564,9 +578,9 @@ var SHAPES = {
     var r = lastResult;
     var extra = lastExtra;
 
-    volInfo.textContent    = r.volCm3.toFixed(1) + " cm³";
-    filInfo.textContent    = Math.round(r.filGrams) + "g";
-    timeInfo.textContent   = formatTime(r.printMin);
+    volInfo.textContent  = r.volCm3.toFixed(1) + " cm³";
+    filInfo.textContent  = Math.round(r.filGrams) + "g";
+    timeInfo.textContent = formatTime(r.printMin);
 
     var breakdown     = $("#price-breakdown");
     var simpleDisplay = $("#price-display-simple");
@@ -702,7 +716,7 @@ function initViewer() {
   if (renderer) return;
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf8fafc);
+  scene.background = new THREE.Color(0xF4F6FB);
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -714,9 +728,9 @@ function initViewer() {
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
   scene.add(ambientLight);
-  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
   dirLight.position.set(1, 2, 3);
   scene.add(dirLight);
   const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.3);
@@ -781,12 +795,12 @@ function loadSTL(arrayBuffer, filename) {
   stlVolumeMm3 = computeVolumeMm3(geometry);
 
   viewerInfoEl.textContent =
-    `크기: ${size.x.toFixed(1)} × ${size.y.toFixed(1)} × ${size.z.toFixed(1)} mm | 부피: ${(stlVolumeMm3 / 1000).toFixed(1)} cm³`;
+    `크기: ${size.x.toFixed(1)} × ${size.y.toFixed(1)} × ${size.z.toFixed(1)} mm  |  부피: ${(stlVolumeMm3 / 1000).toFixed(1)} cm³`;
 
   const material = new THREE.MeshPhongMaterial({
-    color: 0x3b82f6,
-    specular: 0x444444,
-    shininess: 40,
+    color: 0x2563EB,
+    specular: 0x7CABF7,
+    shininess: 50,
     flatShading: false,
   });
   geometry.computeVertexNormals();
@@ -816,16 +830,9 @@ function clearSTL() {
   $("#result-card").classList.remove("visible");
 }
 
-/* ── Drag & Drop ── */
 dropzone.addEventListener("click", () => fileInput.click());
-
-dropzone.addEventListener("dragover", (e) => {
-  e.preventDefault();
-  dropzone.classList.add("dragover");
-});
-dropzone.addEventListener("dragleave", () => {
-  dropzone.classList.remove("dragover");
-});
+dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("dragover"); });
+dropzone.addEventListener("dragleave", () => { dropzone.classList.remove("dragover"); });
 dropzone.addEventListener("drop", (e) => {
   e.preventDefault();
   dropzone.classList.remove("dragover");
@@ -836,7 +843,6 @@ dropzone.addEventListener("drop", (e) => {
 fileInput.addEventListener("change", () => {
   if (fileInput.files[0]) handleFile(fileInput.files[0]);
 });
-
 removeBtn.addEventListener("click", clearSTL);
 
 function handleFile(file) {
@@ -845,7 +851,6 @@ function handleFile(file) {
   reader.readAsArrayBuffer(file);
 }
 
-/* ── STL Calculate Button ── */
 calcStlBtn.addEventListener("click", () => {
   if (!stlVolumeMm3 || !stlBbox) return;
 
