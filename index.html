@@ -352,9 +352,11 @@
           </svg>
           카카오톡 문의하기
         </a>
-        <a class="order-btn order-btn-email" id="contact-btn" href="#" aria-label="견적 문의하기">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          견적 문의하기
+        <a class="order-btn order-btn-email" id="contact-btn" href="#" aria-label="카카오톡 견적 문의">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+            <path d="M9 1.5C4.86 1.5 1.5 4.14 1.5 7.41c0 2.07 1.26 3.9 3.18 4.98L3.9 15.3c-.09.27.18.51.42.36l3.57-2.37c.36.03.72.06 1.11.06 4.14 0 7.5-2.64 7.5-5.91S13.14 1.5 9 1.5z"/>
+          </svg>
+          카카오톡 견적 문의
         </a>
       </div>
 
@@ -496,7 +498,7 @@
       </svg>
       카카오톡 문의하기
     </a>
-    <a class="order-btn order-btn-email" id="sheet-email" href="#">견적 문의하기</a>
+    <a class="order-btn order-btn-email" id="sheet-email" href="#">카카오톡 견적 문의</a>
   </div>
   <p class="bottom-sheet-notice">형상 복잡도, 서포트 구조에 따라 실제 금액은 달라질 수 있습니다.</p>
 </div>
@@ -622,8 +624,7 @@ var CONFIG = {
     premium:  { fee: 150000, label: "Premium (복잡·장식)" },
     custom:   { fee: 0,      label: "Custom (추후 협의)" },
   },
-  KAKAO_JS_KEY: "196a4bfaf916e7fa6a82ee188403639f",
-  CHANNEL_TALK_KEY: "874c3047-0b0c-49f7-b884-10a4f8685504"
+  KAKAO_JS_KEY: "196a4bfaf916e7fa6a82ee188403639f"
 };
 
 if(window.Kakao && !Kakao.isInitialized()){
@@ -760,16 +761,15 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
   var lastResult   = null;
   var lastExtra    = null;
 
-  function openChannelChat(){
-    var msg = window._channelQuoteMsg || "";
-    if(window.ChannelIO){
-      ChannelIO("openChat", undefined, msg);
+  function openKakaoChat(){
+    if(window.Kakao && Kakao.isInitialized()){
+      Kakao.Channel.chat({ channelPublicId: "_ACNxon" });
     } else {
       window.open(CONFIG.KAKAO_CHANNEL+"/chat", "_blank");
     }
   }
   contactBtn.href = "#";
-  contactBtn.addEventListener("click", function(e){ e.preventDefault(); openChannelChat(); });
+  contactBtn.addEventListener("click", function(e){ e.preventDefault(); openKakaoChat(); });
 
   /* ══════════════════════════════════════════
    *  Step Wizard Logic
@@ -1138,7 +1138,7 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     $("#sheet-time").textContent = formatTime(r.printMin);
     var sheetEmailBtn = $("#sheet-email");
     sheetEmailBtn.href = "#";
-    sheetEmailBtn.onclick = function(e){ e.preventDefault(); openChannelChat(); };
+    sheetEmailBtn.onclick = function(e){ e.preventDefault(); openKakaoChat(); };
 
     var dimsGrid=$("#stl-dims-grid");
     if(extra&&extra.bbox){
@@ -1151,31 +1151,6 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     var tierLabel = selectedTier ? (CONFIG.MODELING[selectedTier]||{}).label||selectedTier : "-";
     var shapeName = currentShape && SHAPES[currentShape] ? SHAPES[currentShape].name : (extra&&extra.bbox ? "STL 파일" : "-");
 
-    window._channelQuoteMsg =
-      "[3D 프린팅 견적 문의]\n"+
-      "━━━━━━━━━━━━━━\n"+
-      "품목: "+shapeName+"\n"+
-      "모델링: "+tierLabel+"\n"+
-      "부피: "+r.volCm3.toFixed(1)+" cm³\n"+
-      "필라멘트: "+Math.round(r.filGrams)+"g\n"+
-      "출력시간: "+formatTime(r.printMin)+"\n"+
-      "━━━━━━━━━━━━━━\n"+
-      "예상 금액: "+totalText+"\n"+
-      "━━━━━━━━━━━━━━\n"+
-      "상세 상담 부탁드립니다.";
-
-    if(window.ChannelIO){
-      ChannelIO("updateUser", {
-        profile: {
-          estimateTotal: totalText,
-          modelingTier: tierLabel,
-          shape: shapeName,
-          printVolume: r.volCm3.toFixed(1)+" cm³",
-          filament: Math.round(r.filGrams)+"g",
-          printTime: formatTime(r.printMin)
-        }
-      });
-    }
   }
 
   /* ── Manual Calculate ── */
@@ -1565,54 +1540,6 @@ calcStlBtn.addEventListener("click", ()=>{
     }
   }, 180);
 });
-</script>
-<!-- ════════════════════════════════════════
-     Channel Talk 위젯
-════════════════════════════════════════ -->
-<script>
-(function(){
-  if(!CONFIG.CHANNEL_TALK_KEY || CONFIG.CHANNEL_TALK_KEY==="여기에_채널톡_키_입력") return;
-
-  var w=window;
-  if(w.ChannelIO) return;
-  var ch=function(){ch.c(arguments)};
-  ch.q=[];ch.c=function(a){ch.q.push(a)};
-  w.ChannelIO=ch;
-
-  function l(){
-    if(w.ChannelIOInitialized) return;
-    w.ChannelIOInitialized=true;
-    var s=document.createElement("script");
-    s.type="text/javascript";
-    s.async=true;
-    s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";
-    var x=document.getElementsByTagName("script")[0];
-    if(x.parentNode) x.parentNode.insertBefore(s,x);
-  }
-  if(document.readyState==="complete") l();
-  else w.addEventListener("load",l);
-
-  ch("boot",{
-    pluginKey: CONFIG.CHANNEL_TALK_KEY,
-    customLauncherSelector: null,
-    hideChannelButtonOnBoot: false,
-    profile: {
-      source: "3D프린팅 견적 계산기",
-      estimateTotal: "-",
-      modelingTier: "-",
-      shape: "-",
-      printVolume: "-",
-      filament: "-",
-      printTime: "-"
-    }
-  });
-
-  ch("onChatCreated", function(){
-    if(window._channelQuoteMsg){
-      ChannelIO("openChat", undefined, window._channelQuoteMsg);
-    }
-  });
-})();
 </script>
 </body>
 </html>
