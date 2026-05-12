@@ -1285,6 +1285,7 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     var needsModeling = selectedTier!=="none" && selectedTier!=="custom";
     var isCustom = selectedTier==="custom";
     var totalText;
+    var siteUrl = "https://shinhp3.github.io/eoulrimstudio-estimate/";
 
     if(isCustom){
       totalText = "추후 협의";
@@ -1292,32 +1293,36 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
       totalText = fmt(mc.fee + lastResult.low)+"원 ~ "+fmt(mc.fee + lastResult.high)+"원";
     }
 
-    var descParts = [];
-    if(needsModeling) descParts.push("모델링: "+fmt(mc.fee)+"원");
-    descParts.push("출력: "+fmt(lastResult.low)+"~"+fmt(lastResult.high)+"원");
-    descParts.push("부피: "+lastResult.volCm3.toFixed(1)+"cm³");
-    descParts.push("필라멘트: "+Math.round(lastResult.filGrams)+"g");
-    descParts.push("출력시간: "+formatTime(lastResult.printMin));
+    var items = [];
+    if(needsModeling) items.push({ item: "모델링", item_op: fmt(mc.fee)+"원" });
+    if(isCustom) items.push({ item: "모델링", item_op: "추후 협의" });
+    items.push({ item: "출력비", item_op: fmt(lastResult.low)+"~"+fmt(lastResult.high)+"원" });
+    items.push({ item: "부피", item_op: lastResult.volCm3.toFixed(1)+" cm³" });
+    items.push({ item: "필라멘트", item_op: Math.round(lastResult.filGrams)+"g" });
+    items.push({ item: "출력시간", item_op: formatTime(lastResult.printMin) });
+
+    var today = new Date();
+    var dateStr = today.getFullYear()+"."+(today.getMonth()+1)+"."+today.getDate();
 
     if(window.Kakao && Kakao.isInitialized()){
       Kakao.Share.sendDefault({
         objectType: "feed",
         content: {
-          title: "3D 프린팅 견적서 — 어울,림",
-          description: "예상 금액: "+totalText+"\n"+descParts.join("\n"),
+          title: "3D 프린팅 견적서",
+          description: "어울,림 Eoulrimstudio · "+dateStr,
           imageUrl: "https://shinhp3.github.io/eoulrimstudio-estimate/og-image.png",
-          link: {
-            mobileWebUrl: "https://shinhp3.github.io/eoulrimstudio-estimate/",
-            webUrl: "https://shinhp3.github.io/eoulrimstudio-estimate/"
-          }
+          link: { mobileWebUrl: siteUrl, webUrl: siteUrl }
         },
-        buttons: [{
-          title: "견적서 확인하기",
-          link: {
-            mobileWebUrl: "https://shinhp3.github.io/eoulrimstudio-estimate/",
-            webUrl: "https://shinhp3.github.io/eoulrimstudio-estimate/"
-          }
-        }]
+        itemContent: {
+          profileText: "어울,림 3D 프린팅",
+          items: items,
+          sum: "예상 금액",
+          sumOp: totalText
+        },
+        buttons: [
+          { title: "견적서 확인하기", link: { mobileWebUrl: siteUrl, webUrl: siteUrl } },
+          { title: "카카오톡 상담", link: { mobileWebUrl: "http://pf.kakao.com/_ACNxon/chat", webUrl: "http://pf.kakao.com/_ACNxon/chat" } }
+        ]
       });
     } else {
       window.open(CONFIG.KAKAO_CHANNEL+"/chat", "_blank");
