@@ -7,264 +7,68 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
-:root{
-  --bg:#f4f5f7;
-  --bg-card:#ffffff;
-  --accent:#1a2332;
-  --accent-hover:#2a3a52;
-  --primary:#3b82f6;
-  --primary-hover:#2563eb;
-  --text:#1e293b;
-  --text-mid:#4a5568;
-  --text-light:#94a3b8;
-  --border:#e5e7eb;
-  --border-focus:#93c5fd;
-  --error:#ef4444;
-  --shadow:0 1px 3px rgba(0,0,0,.04),0 4px 20px rgba(0,0,0,.03);
-  --radius:12px;
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
 }
-
-html{font-size:15px}
-body{
-  font-family:'Noto Sans KR',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  padding:28px 16px 52px;
-  line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-}
-
-.wrapper{width:100%;max-width:640px}
-
-/* ── Header ── */
-.header{text-align:center;margin-bottom:24px}
-.header h1{
-  font-size:1.35rem;font-weight:700;color:var(--accent);
-  letter-spacing:-.02em;margin-bottom:2px;
-}
-.header .subtitle{font-size:.8rem;color:var(--text-light);font-weight:300}
-.badge{
-  display:inline-flex;align-items:center;gap:4px;
-  background:var(--accent);color:#fff;
-  font-size:.65rem;font-weight:600;letter-spacing:.04em;
-  padding:3px 10px;border-radius:20px;margin-bottom:10px;
-}
-.badge::before{content:"◆";font-size:.45rem;opacity:.6}
-
-/* ── Card ── */
-.card{
-  background:var(--bg-card);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:24px 22px;
-  margin-bottom:16px;
-  border:1px solid var(--border);
-}
-.section-title{
-  font-size:.8rem;font-weight:600;color:var(--accent);
-  margin-bottom:12px;
-}
-.section-title+.section-title{margin-top:20px}
-.divider{
-  border:none;border-top:1px solid var(--border);
-  margin:18px 0;
-}
-
-/* ── Shape Selector ── */
-.shape-grid{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:8px;margin-bottom:6px;
-}
-.shape-btn{
-  display:flex;flex-direction:column;align-items:center;gap:3px;
-  padding:10px 4px 8px;
-  border:1.5px solid var(--border);border-radius:10px;
-  background:#fff;cursor:pointer;
-  font-family:inherit;font-size:.68rem;font-weight:500;
-  color:var(--text-mid);
-  transition:all .18s ease;
-}
-.shape-btn:hover{border-color:#cbd5e1;background:#f8fafc}
-.shape-btn.active{
-  border-color:var(--accent);background:var(--accent);color:#fff;
-}
-.shape-btn.active:hover{background:var(--accent-hover)}
-.shape-btn svg{
-  width:22px;height:22px;
-  stroke:currentColor;fill:none;
-  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
-}
-
-/* ── Form Fields ── */
-.dim-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:10px;margin-bottom:6px;
-}
-.dim-grid.two-fields{grid-template-columns:1fr 1fr}
-
-.field{display:flex;flex-direction:column;gap:3px;position:relative}
-.field.hidden{display:none}
-.field label{font-size:.72rem;font-weight:500;color:var(--text-mid)}
-.field input[type="number"]{
-  width:100%;padding:8px 34px 8px 10px;
-  border:1.5px solid var(--border);border-radius:8px;
-  font-size:.9rem;font-family:inherit;color:var(--text);
-  background:#fff;transition:border-color .2s;
-  -moz-appearance:textfield;
-}
-.field input[type="number"]::-webkit-inner-spin-button,
-.field input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-.field input:focus{outline:none;border-color:var(--border-focus)}
-.field .unit{
-  position:absolute;right:10px;bottom:24px;
-  font-size:.72rem;color:var(--text-light);pointer-events:none;
-}
-.field.has-error input{border-color:var(--error)}
-.field .error-msg{
-  font-size:.65rem;color:var(--error);
-  min-height:14px;
-}
-
-/* ── Slider ── */
-.slider-section{margin-top:2px}
-.slider-row{display:flex;align-items:center;gap:12px;margin-top:4px}
-.slider-row input[type="range"]{
-  flex:1;-webkit-appearance:none;appearance:none;
-  height:5px;border-radius:3px;
-  background:linear-gradient(to right,var(--accent) 0%,var(--border) 0%);
-  outline:none;cursor:pointer;
-}
-.slider-row input[type="range"]::-webkit-slider-thumb{
-  -webkit-appearance:none;width:18px;height:18px;
-  border-radius:50%;background:var(--accent);
-  border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15);
-  cursor:pointer;transition:transform .12s;
-}
-.slider-row input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.12)}
-.slider-row input[type="range"]::-moz-range-thumb{
-  width:18px;height:18px;border-radius:50%;
-  background:var(--accent);border:2.5px solid #fff;
-  box-shadow:0 1px 4px rgba(0,0,0,.15);cursor:pointer;
-}
-.slider-val{
-  min-width:42px;text-align:center;
-  font-size:.88rem;font-weight:600;color:var(--accent);
-}
-.infill-note{
-  font-size:.66rem;color:var(--text-light);
-  line-height:1.6;margin-top:8px;
-  padding:8px 10px;
-  background:#f8fafc;border-radius:6px;
-  border-left:2.5px solid var(--border);
-}
-
-/* ── Button ── */
-.btn{
-  display:block;width:100%;
-  padding:11px 16px;margin-top:10px;
-  border:none;border-radius:8px;cursor:pointer;
-  font-family:inherit;font-size:.85rem;font-weight:600;
-  transition:background .2s,transform .08s;
-  text-align:center;text-decoration:none;
-}
-.btn:active{transform:scale(.985)}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-hover)}
-.btn-contact{
-  background:var(--primary);color:#fff;margin-top:14px;
-}
-.btn-contact:hover{background:var(--primary-hover)}
-
-/* ── Result ── */
-.result-card{
-  opacity:0;transform:translateY(10px);
-  pointer-events:none;
-  transition:opacity .4s ease,transform .4s ease;
-}
-.result-card.visible{
-  opacity:1;transform:translateY(0);pointer-events:auto;
-}
-
-.price-display{text-align:center;padding:14px 0 10px}
-.price-label{font-size:.75rem;color:var(--text-light);margin-bottom:4px}
-.price-value{
-  font-size:1.4rem;font-weight:700;color:var(--accent);
-  letter-spacing:-.02em;line-height:1.3;
-}
-
-.info-grid{
-  display:grid;grid-template-columns:1fr 1fr 1fr;
-  gap:8px;margin-bottom:10px;
-}
-.info-item{
-  text-align:center;padding:10px 8px;
-  background:#f8fafc;border-radius:8px;
-}
-.info-item .info-label{
-  font-size:.65rem;color:var(--text-light);margin-bottom:2px;
-}
-.info-item .info-value{
-  font-size:.88rem;font-weight:600;color:var(--text);
-}
-
-.disclaimer{
-  font-size:.66rem;color:var(--text-light);
-  text-align:center;line-height:1.7;
-  border-top:1px solid var(--border);
-  padding-top:12px;margin-top:6px;
-}
-
-/* ── Footer ── */
-.footer{
-  text-align:center;font-size:.65rem;color:var(--text-light);
-  margin-top:8px;opacity:.5;
-}
-
-/* ── Desktop ── */
-@media(min-width:641px){
-  .btn{max-width:320px;margin-left:auto;margin-right:auto}
-  .btn-contact{max-width:280px}
-}
-
-/* ── Mobile ── */
-@media(max-width:480px){
-  body{padding:16px 12px 40px}
-  .card{padding:20px 16px}
-  .shape-grid{grid-template-columns:repeat(3,1fr)}
-  .dim-grid{grid-template-columns:1fr}
-  .dim-grid.two-fields{grid-template-columns:1fr}
-  .info-grid{grid-template-columns:1fr}
-  .header h1{font-size:1.2rem}
-  .price-value{font-size:1.25rem}
-}
-</style>
+</script>
 </head>
 <body>
 <div class="wrapper">
 
   <div class="header">
     <span class="badge">PLA 소재 전용</span>
-    <h1>3D 프린팅 견적 계산기</h1>
+    <h1>3D 프린팅<br>견적 계산기</h1>
     <p class="subtitle">어울,림 Eoulrimstudio</p>
   </div>
 
-  <!-- 입력 카드 -->
+  <!-- 모델링 단계 선택 -->
   <div class="card">
+    <div class="section-title">3D 모델링이 필요하신가요?</div>
+    <div class="tier-grid" id="tier-grid">
+      <button class="tier-btn active" data-tier="none" type="button">
+        <span class="tier-name">모델 보유</span>
+        <span class="tier-desc">STL 파일이 있어요</span>
+        <span class="tier-price">₩0</span>
+      </button>
+      <button class="tier-btn" data-tier="lite" type="button">
+        <span class="tier-name">Lite</span>
+        <span class="tier-desc">단순한 형태</span>
+        <span class="tier-price">₩50,000</span>
+      </button>
+      <button class="tier-btn" data-tier="standard" type="button">
+        <span class="tier-name">Standard</span>
+        <span class="tier-desc">곡선·복합 형태</span>
+        <span class="tier-price">₩80,000</span>
+      </button>
+      <button class="tier-btn" data-tier="premium" type="button">
+        <span class="tier-name">Premium</span>
+        <span class="tier-desc">복잡·장식 형태</span>
+        <span class="tier-price">₩150,000</span>
+      </button>
+      <button class="tier-btn" data-tier="custom" type="button">
+        <span class="tier-name">Custom</span>
+        <span class="tier-desc">정밀·분할 다수</span>
+        <span class="tier-price">추후 협의</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 입력 모드 탭 -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="manual" type="button">수동 입력</button>
+    <button class="tab-btn" data-tab="stl" type="button">STL 파일 업로드</button>
+  </div>
+
+  <!-- 수동 입력 카드 -->
+  <div class="card tab-panel" id="panel-manual">
     <div class="section-title">형태 선택</div>
     <div class="shape-grid" id="shape-grid">
-      <button class="shape-btn active" data-shape="box" type="button">
-        <svg viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z"/><path d="M3 7l9 5 9-5"/><path d="M12 12v10"/></svg>
-        <span>직육면체</span>
-      </button>
-      <button class="shape-btn" data-shape="cylinder" type="button">
+      <button class="shape-btn active" data-shape="cylinder" type="button">
         <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/></svg>
         <span>원기둥</span>
       </button>
@@ -306,30 +110,77 @@ body{
       </div>
     </div>
 
-    <hr class="divider">
+    <button class="btn btn-primary" id="calc-btn" type="button">견적 계산하기</button>
+  </div>
 
-    <div class="slider-section">
-      <div class="section-title">채움율 (Infill)</div>
-      <div class="slider-row">
-        <input type="range" id="infill" min="5" max="100" value="15" step="1">
-        <span class="slider-val" id="infill-val">15%</span>
-      </div>
-      <p class="infill-note">
-        기본 15% 권장. 5%까지 낮추면 시간·비용을 절감할 수 있으나,
-        채움율이 낮을수록 내구성이 떨어질 수 있습니다.
-      </p>
+  <!-- STL 업로드 카드 -->
+  <div class="card tab-panel hidden" id="panel-stl">
+    <div class="section-title">STL 파일</div>
+    <div class="stl-dropzone" id="stl-dropzone">
+      <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <p class="dropzone-text">STL 파일을 여기에 드롭하거나 클릭해 선택</p>
+      <p class="dropzone-hint">.stl 파일만 지원</p>
+      <input type="file" id="stl-input" accept=".stl" hidden>
+    </div>
+    <div class="stl-file-info hidden" id="stl-file-info">
+      <span class="stl-filename" id="stl-filename"></span>
+      <button class="stl-remove-btn" id="stl-remove-btn" type="button">✕ 제거</button>
     </div>
 
-    <button class="btn btn-primary" id="calc-btn" type="button">견적 계산하기</button>
+    <!-- 3D 뷰어 -->
+    <div class="viewer-container hidden" id="viewer-container">
+      <canvas id="stl-viewer"></canvas>
+      <div class="viewer-info" id="viewer-info"></div>
+    </div>
+
+    <button class="btn btn-primary" id="calc-stl-btn" type="button" disabled>견적 계산하기</button>
+  </div>
+
+  <!-- 로딩 오버레이 -->
+  <div class="loading-overlay hidden" id="loading-overlay">
+    <div class="loading-card">
+      <div class="loading-spinner"></div>
+      <p class="loading-text" id="loading-text">모델을 분석하고 있습니다...</p>
+      <div class="loading-bar-track">
+        <div class="loading-bar-fill" id="loading-bar-fill"></div>
+      </div>
+      <p class="loading-step" id="loading-step">부피 계산 중</p>
+    </div>
   </div>
 
   <!-- 결과 카드 -->
   <div class="card result-card" id="result-card">
     <div class="section-title">예상 견적</div>
-    <div class="price-display">
-      <div class="price-label">예상 금액 범위</div>
+
+    <!-- 모델링+출력 합산 (모델 없을 때) — 계산기 스타일 -->
+    <div class="calc-display hidden" id="price-breakdown">
+      <div class="calc-screen">
+        <div class="calc-line-item">
+          <span class="calc-line-label">모델링</span>
+          <span class="calc-line-amount" id="modeling-price">—</span>
+        </div>
+        <div class="calc-line-item">
+          <span class="calc-line-op">+</span>
+          <span class="calc-line-label">출력</span>
+          <span class="calc-line-amount" id="printing-price">—</span>
+        </div>
+        <div class="calc-separator"></div>
+        <div class="calc-total-row">
+          <span class="calc-total-amount" id="total-price">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 출력만 (모델 있을 때) -->
+    <div class="price-display" id="price-display-simple">
+      <div class="price-label">예상 출력 비용</div>
       <div class="price-value" id="price-value"></div>
     </div>
+
     <div class="info-grid">
       <div class="info-item">
         <div class="info-label">추정 부피</div>
@@ -344,6 +195,20 @@ body{
         <div class="info-value" id="time-info">—</div>
       </div>
     </div>
+    <div class="info-grid" id="stl-dims-grid" style="display:none">
+      <div class="info-item">
+        <div class="info-label">X (가로)</div>
+        <div class="info-value" id="dim-x-info">—</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Y (세로)</div>
+        <div class="info-value" id="dim-y-info">—</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Z (높이)</div>
+        <div class="info-value" id="dim-z-info">—</div>
+      </div>
+    </div>
     <a class="btn btn-contact" id="contact-btn" href="#">견적 문의하기</a>
     <p class="disclaimer">본 견적은 참고용이며 실제 가격은 상담 후 확정됩니다.<br>형상 복잡도·서포트 구조에 따라 달라질 수 있습니다.</p>
   </div>
@@ -353,60 +218,54 @@ body{
 
 <script>
 /* ══════════════════════════════════════════════════
- *  CONFIG — 이 값만 수정하면 견적·시간이 바뀝니다
+ *  CONFIG
  * ══════════════════════════════════════════════════ */
 var CONFIG = {
   CONTACT_EMAIL: "eoulrimstudio@gmail.com",
+  FILAMENT_RATE:  40,
+  MACHINE_RATE:   3000,
+  MIN_PRICE:      10000,
+  RANGE:          0.15,
+  LAYER_HEIGHT:       0.20,
+  LINE_WIDTH:         0.42,
+  PRINT_SPEED:        200,
+  SPEED_EFFICIENCY:   0.50,
+  WALL_COUNT:         2,
+  TOP_BOTTOM_LAYERS:  3,
+  LAYER_CHANGE_TIME:  1.5,
+  WALL_THICKNESS:     2.5,
+  PLA_DENSITY:        1.24,
 
-  // ── 가격 설정 ──
-  FILAMENT_RATE:  40,     // 원/cm³ — PLA 재료 단가 (원가 + 마진)
-  MACHINE_RATE:   3000,   // 원/시간 — 기계 가동비 (전기·감가·운영비)
-  MIN_PRICE:      10000,  // 최소 견적금액 (원)
-  RANGE:          0.15,   // 견적 범위 ±15%
-
-  // ── 뱀부랩 스튜디오 PLA 기본 출력 설정 ──
-  LAYER_HEIGHT:       0.20,  // mm — 레이어 높이 (0.20 표준)
-  LINE_WIDTH:         0.42,  // mm — 압출 선폭 (0.4mm 노즐)
-  PRINT_SPEED:        200,   // mm/s — 뱀부랩 PLA 기본 속도
-  SPEED_EFFICIENCY:   0.50,  // 가감속·코너·리트렉션 감안 실효 속도 비율
-  WALL_COUNT:         2,     // 외벽 수 (퍼리미터)
-  TOP_BOTTOM_LAYERS:  3,     // 상/하면 솔리드 레이어 수
-  LAYER_CHANGE_TIME:  1.5,   // 초 — 레이어 전환 오버헤드
-
-  // ── 형태 설정 ──
-  WALL_THICKNESS:     2.5,   // mm — 컵·볼 등 속이 빈 형태의 벽 두께
-
-  // ── 참고 상수 ──
-  PLA_DENSITY:        1.24,  // g/cm³ — PLA 밀도
+  // ── 모델링 비용 (메뉴판 기준) ──
+  MODELING: {
+    none:     { fee: 0,      label: "모델 보유" },
+    lite:     { fee: 50000,  label: "Lite (단순)" },
+    standard: { fee: 80000,  label: "Standard (곡선·복합)" },
+    premium:  { fee: 150000, label: "Premium (복잡·장식)" },
+    custom:   { fee: 0,      label: "Custom (추후 협의)" },
+  },
 };
 
 /* ══════════════════════════════════════════════════
- *  형태별 부피 계산 정의
+ *  형태별 부피 계산
  * ══════════════════════════════════════════════════ */
 var SHAPES = {
   box: {
     name: "직육면체",
     labels: ["가로 (X)", "세로 (Y)", "높이 (Z)"],
-    useY: true,
-    solid: true,
-    volume: function (x, y, z) {
-      return x * y * z / 1000;
-    }
+    useY: true, solid: true,
+    volume: function (x, y, z) { return x * y * z / 1000; }
   },
   cylinder: {
     name: "원기둥",
     labels: ["지름 (D)", null, "높이 (H)"],
-    useY: false,
-    solid: true,
-    volume: function (d, _, h) {
-      return Math.PI / 4 * d * d * h / 1000;
-    }
+    useY: false, solid: true,
+    volume: function (d, _, h) { return Math.PI / 4 * d * d * h / 1000; }
   },
   cup: {
     name: "컵",
     labels: ["외경 (D)", null, "높이 (H)"],
-    useY: false,
-    solid: false,
+    useY: false, solid: false,
     volume: function (d, _, h) {
       var R = d / 2, W = CONFIG.WALL_THICKNESS;
       var r = Math.max(R - W, 0);
@@ -419,17 +278,13 @@ var SHAPES = {
   plate: {
     name: "접시",
     labels: ["지름 (D)", null, "두께 (H)"],
-    useY: false,
-    solid: true,
-    volume: function (d, _, h) {
-      return Math.PI / 4 * d * d * h / 1000;
-    }
+    useY: false, solid: true,
+    volume: function (d, _, h) { return Math.PI / 4 * d * d * h / 1000; }
   },
   bowl: {
     name: "볼/그릇",
     labels: ["지름 (D)", null, "깊이 (H)"],
-    useY: false,
-    solid: false,
+    useY: false, solid: false,
     volume: function (d, _, h) {
       var W = CONFIG.WALL_THICKNESS;
       return Math.PI * (d * d / 4 + h * h) * W / 1000;
@@ -438,11 +293,13 @@ var SHAPES = {
 };
 
 /* ══════════════════════════════════════════════════
- *  DOM & State
+ *  DOM & 수동 입력 로직
  * ══════════════════════════════════════════════════ */
 (function () {
   var $ = function (s) { return document.querySelector(s); };
   var $$ = function (s) { return document.querySelectorAll(s); };
+
+  var FIXED_INFILL = 5;
 
   var dimX       = $("#dim-x");
   var dimY       = $("#dim-y");
@@ -451,8 +308,6 @@ var SHAPES = {
   var labelZ     = $("#label-z");
   var fieldY     = $("#field-y");
   var dimGrid    = $("#dim-grid");
-  var infill     = $("#infill");
-  var infillVal  = $("#infill-val");
   var calcBtn    = $("#calc-btn");
   var resultCard = $("#result-card");
   var priceValue = $("#price-value");
@@ -461,9 +316,39 @@ var SHAPES = {
   var timeInfo   = $("#time-info");
   var contactBtn = $("#contact-btn");
 
-  var currentShape = "box";
+  var currentShape = "cylinder";
+  var selectedTier = "none";
 
   contactBtn.href = "mailto:" + CONFIG.CONTACT_EMAIL + "?subject=3D 프린팅 견적 문의";
+
+  /* ── Tier selection ── */
+  $$(".tier-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      $$(".tier-btn").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      selectedTier = btn.dataset.tier;
+      if (lastResult) {
+        renderResult();
+      }
+    });
+  });
+
+  /* ── Tab switching ── */
+  $$(".tab-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      $$(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      var tab = btn.dataset.tab;
+      if (tab === "manual") {
+        $("#panel-manual").classList.remove("hidden");
+        $("#panel-stl").classList.add("hidden");
+      } else {
+        $("#panel-stl").classList.remove("hidden");
+        $("#panel-manual").classList.add("hidden");
+      }
+      resultCard.classList.remove("visible");
+    });
+  });
 
   /* ── Shape switching ── */
   $$(".shape-btn").forEach(function (btn) {
@@ -489,16 +374,6 @@ var SHAPES = {
     }
     resultCard.classList.remove("visible");
   }
-
-  /* ── Slider ── */
-  function updateSliderTrack() {
-    var pct = ((infill.value - infill.min) / (infill.max - infill.min)) * 100;
-    infill.style.background =
-      "linear-gradient(to right, var(--accent) " + pct + "%, var(--border) " + pct + "%)";
-    infillVal.textContent = infill.value + "%";
-  }
-  infill.addEventListener("input", updateSliderTrack);
-  updateSliderTrack();
 
   /* ── Validation ── */
   function clearError(fid) {
@@ -566,17 +441,15 @@ var SHAPES = {
     return perimFrac + (1 - perimFrac) * infPct / 100;
   }
 
-  function estimate(shapeKey, x, y, z, infPct) {
+  function estimateManual(shapeKey, x, y, z, infPct) {
     var shape    = SHAPES[shapeKey];
     var volCm3   = shape.volume(x, y, z);
     var effFill  = calcEffectiveFill(shapeKey, x, y, z, infPct);
     var matCm3   = volCm3 * effFill;
     var matMm3   = matCm3 * 1000;
 
-    var flowRate = CONFIG.LINE_WIDTH
-                 * CONFIG.LAYER_HEIGHT
-                 * CONFIG.PRINT_SPEED
-                 * CONFIG.SPEED_EFFICIENCY;
+    var flowRate = CONFIG.LINE_WIDTH * CONFIG.LAYER_HEIGHT
+                 * CONFIG.PRINT_SPEED * CONFIG.SPEED_EFFICIENCY;
 
     var extrudeSec   = matMm3 / flowRate;
     var numLayers    = Math.ceil(z / CONFIG.LAYER_HEIGHT);
@@ -592,17 +465,179 @@ var SHAPES = {
     var high = ceil(subtotal * (1 + CONFIG.RANGE), 1000);
     if (low < CONFIG.MIN_PRICE) low = CONFIG.MIN_PRICE;
 
-    return {
-      volCm3:     volCm3,
-      matCm3:     matCm3,
-      filGrams:   matCm3 * CONFIG.PLA_DENSITY,
-      printMin:   totalMin,
-      low:        low,
-      high:       high
-    };
+    return { volCm3: volCm3, matCm3: matCm3, filGrams: matCm3 * CONFIG.PLA_DENSITY, printMin: totalMin, low: low, high: high };
   }
 
-  /* ── Calculate ── */
+  /* ── STL 견적 계산 (부피 mm³ → cm³ 기반) ── */
+  window.estimateFromSTL = function (volMm3, bbox, infPct) {
+    var volCm3 = volMm3 / 1000;
+    var z = bbox.z;
+
+    var lineW     = CONFIG.LINE_WIDTH;
+    var wallThick = CONFIG.WALL_COUNT * lineW;
+    var tbThick   = CONFIG.TOP_BOTTOM_LAYERS * CONFIG.LAYER_HEIGHT;
+
+    var surfaceArea = 2 * (bbox.x * bbox.y + bbox.x * bbox.z + bbox.y * bbox.z);
+    var boundingVol = bbox.x * bbox.y * bbox.z;
+    var wallFrac = Math.min(1, surfaceArea * wallThick / boundingVol);
+    var tbFrac   = Math.min(1, 2 * tbThick / z);
+    var solidFrac = Math.min(1, wallFrac + tbFrac);
+    var effFill = solidFrac + (1 - solidFrac) * infPct / 100;
+
+    var matCm3 = volCm3 * effFill;
+    var matMm3 = matCm3 * 1000;
+
+    var flowRate = CONFIG.LINE_WIDTH * CONFIG.LAYER_HEIGHT
+                 * CONFIG.PRINT_SPEED * CONFIG.SPEED_EFFICIENCY;
+
+    var extrudeSec = matMm3 / flowRate;
+    var numLayers  = Math.ceil(z / CONFIG.LAYER_HEIGHT);
+    var layerSec   = numLayers * CONFIG.LAYER_CHANGE_TIME;
+    var totalMin   = (extrudeSec + layerSec) / 60;
+
+    var materialCost = matCm3 * CONFIG.FILAMENT_RATE;
+    var machineCost  = (totalMin / 60) * CONFIG.MACHINE_RATE;
+    var subtotal     = materialCost + machineCost;
+    if (subtotal < CONFIG.MIN_PRICE) subtotal = CONFIG.MIN_PRICE;
+
+    var low  = ceil(subtotal * (1 - CONFIG.RANGE), 1000);
+    var high = ceil(subtotal * (1 + CONFIG.RANGE), 1000);
+    if (low < CONFIG.MIN_PRICE) low = CONFIG.MIN_PRICE;
+
+    return { volCm3: volCm3, matCm3: matCm3, filGrams: matCm3 * CONFIG.PLA_DENSITY, printMin: totalMin, low: low, high: high };
+  };
+
+  /* ── 로딩 애니메이션 ── */
+  var loadingOverlay = $("#loading-overlay");
+  var loadingText    = $("#loading-text");
+  var loadingStep    = $("#loading-step");
+  var loadingBarFill = $("#loading-bar-fill");
+
+  var loadingSteps = [
+    { text: "부피 계산 중", pct: 20 },
+    { text: "재료 소요량 분석 중", pct: 45 },
+    { text: "출력 시간 추정 중", pct: 70 },
+    { text: "견적 산출 중", pct: 90 },
+    { text: "완료!", pct: 100 },
+  ];
+
+  function showLoading(callback) {
+    loadingOverlay.classList.remove("hidden");
+    loadingBarFill.style.width = "0%";
+    loadingStep.textContent = loadingSteps[0].text;
+    loadingText.textContent = "모델을 분석하고 있습니다...";
+
+    var i = 0;
+    var interval = setInterval(function () {
+      if (i < loadingSteps.length) {
+        loadingBarFill.style.width = loadingSteps[i].pct + "%";
+        loadingStep.textContent = loadingSteps[i].text;
+        i++;
+      } else {
+        clearInterval(interval);
+        setTimeout(function () {
+          loadingOverlay.classList.add("hidden");
+          callback();
+        }, 300);
+      }
+    }, 350);
+  }
+
+  /* ── 모델링 비용 (선택된 tier 기반) ── */
+  function getModelingCost() {
+    return CONFIG.MODELING[selectedTier] || CONFIG.MODELING.none;
+  }
+
+  /* ── 마지막 계산 결과 저장 (옵션 변경 시 재계산용) ── */
+  var lastResult = null;
+  var lastExtra  = null;
+
+  /* ── 결과 표시 공통 함수 ── */
+  window.showResult = function (r, extra) {
+    lastResult = r;
+    lastExtra  = extra;
+    renderResult();
+  };
+
+  function renderResult() {
+    if (!lastResult) return;
+    var r = lastResult;
+    var extra = lastExtra;
+
+    volInfo.textContent    = r.volCm3.toFixed(1) + " cm³";
+    filInfo.textContent    = Math.round(r.filGrams) + "g";
+    timeInfo.textContent   = formatTime(r.printMin);
+
+    var breakdown     = $("#price-breakdown");
+    var simpleDisplay = $("#price-display-simple");
+    var mc = getModelingCost();
+    var needsModeling = selectedTier !== "none" && selectedTier !== "custom";
+    var isCustom = selectedTier === "custom";
+
+    if (needsModeling) {
+      var totalLow  = mc.fee + r.low;
+      var totalHigh = mc.fee + r.high;
+
+      $("#modeling-price").textContent = fmt(mc.fee) + "원";
+      $("#printing-price").textContent = fmt(r.low) + "원 ~ " + fmt(r.high) + "원";
+      $("#total-price").textContent    = fmt(totalLow) + "원 ~ " + fmt(totalHigh) + "원";
+
+      breakdown.classList.remove("hidden");
+      simpleDisplay.style.display = "none";
+
+      contactBtn.href = "mailto:" + CONFIG.CONTACT_EMAIL
+        + "?subject=3D 프린팅 견적 문의"
+        + "&body=" + encodeURIComponent(
+          (extra && extra.emailBody ? extra.emailBody : "")
+          + "\n※ 모델링: " + mc.label + "\n"
+          + "- 모델링 비용: " + fmt(mc.fee) + "원\n"
+          + "- 출력 비용: " + fmt(r.low) + "원 ~ " + fmt(r.high) + "원\n"
+          + "- 총 합계: " + fmt(totalLow) + "원 ~ " + fmt(totalHigh) + "원\n"
+        );
+    } else if (isCustom) {
+      $("#modeling-price").textContent = "추후 협의";
+      $("#printing-price").textContent = fmt(r.low) + "원 ~ " + fmt(r.high) + "원";
+      $("#total-price").textContent    = "추후 협의";
+
+      breakdown.classList.remove("hidden");
+      simpleDisplay.style.display = "none";
+
+      contactBtn.href = "mailto:" + CONFIG.CONTACT_EMAIL
+        + "?subject=3D 프린팅 견적 문의 (Custom 모델링)"
+        + "&body=" + encodeURIComponent(
+          (extra && extra.emailBody ? extra.emailBody : "")
+          + "\n※ Custom 모델링 요청\n"
+          + "- 출력 비용: " + fmt(r.low) + "원 ~ " + fmt(r.high) + "원\n"
+          + "- 모델링 비용: 추후 협의\n"
+        );
+    } else {
+      priceValue.textContent = "약 " + fmt(r.low) + "원 ~ " + fmt(r.high) + "원";
+      breakdown.classList.add("hidden");
+      simpleDisplay.style.display = "";
+
+      if (extra && extra.emailBody) {
+        contactBtn.href = "mailto:" + CONFIG.CONTACT_EMAIL
+          + "?subject=3D 프린팅 견적 문의"
+          + "&body=" + encodeURIComponent(extra.emailBody);
+      }
+    }
+
+    var dimsGrid = $("#stl-dims-grid");
+    if (extra && extra.bbox) {
+      dimsGrid.style.display = "";
+      $("#dim-x-info").textContent = extra.bbox.x.toFixed(1) + " mm";
+      $("#dim-y-info").textContent = extra.bbox.y.toFixed(1) + " mm";
+      $("#dim-z-info").textContent = extra.bbox.z.toFixed(1) + " mm";
+    } else {
+      dimsGrid.style.display = "none";
+    }
+
+    resultCard.classList.remove("visible");
+    void resultCard.offsetHeight;
+    resultCard.classList.add("visible");
+  }
+
+  /* ── Manual Calculate ── */
   calcBtn.addEventListener("click", function () {
     var shape = SHAPES[currentShape];
     var vx = validateField(dimX, "field-x");
@@ -616,38 +651,262 @@ var SHAPES = {
     var x   = parseFloat(dimX.value);
     var y   = shape.useY ? parseFloat(dimY.value) : 0;
     var z   = parseFloat(dimZ.value);
-    var inf = parseFloat(infill.value);
+    var inf = FIXED_INFILL;
 
-    var r = estimate(currentShape, x, y, z, inf);
+    showLoading(function () {
+      var r = estimateManual(currentShape, x, y, z, inf);
 
-    priceValue.textContent = "약 " + fmt(r.low) + "원 ~ " + fmt(r.high) + "원";
-    volInfo.textContent    = r.volCm3.toFixed(1) + " cm³";
-    filInfo.textContent    = Math.round(r.filGrams) + "g";
-    timeInfo.textContent   = formatTime(r.printMin);
+      var sizeText = shape.useY
+        ? (x + " × " + y + " × " + z + " mm")
+        : ("지름 " + x + " × 높이 " + z + " mm");
 
-    var sizeText = shape.useY
-      ? (x + " × " + y + " × " + z + " mm")
-      : ("지름 " + x + " × 높이 " + z + " mm");
-
-    contactBtn.href = "mailto:" + CONFIG.CONTACT_EMAIL
-      + "?subject=3D 프린팅 견적 문의"
-      + "&body=" + encodeURIComponent(
-        "안녕하세요, 3D 프린팅 견적 문의드립니다.\n\n"
-        + "- 형태: " + shape.name + "\n"
-        + "- 크기: " + sizeText + "\n"
-        + "- 채움율: " + inf + "%\n"
-        + "- 추정 부피: " + r.volCm3.toFixed(1) + " cm³\n"
-        + "- 필라멘트: " + Math.round(r.filGrams) + "g\n"
-        + "- 예상 출력 시간: " + formatTime(r.printMin) + "\n"
-        + "- 예상 견적: " + fmt(r.low) + "원 ~ " + fmt(r.high) + "원\n\n"
-        + "상세 상담 부탁드립니다."
-      );
-
-    resultCard.classList.remove("visible");
-    void resultCard.offsetHeight;
-    resultCard.classList.add("visible");
+      window.showResult(r, {
+        emailBody: "안녕하세요, 3D 프린팅 견적 문의드립니다.\n\n"
+          + "- 형태: " + shape.name + "\n"
+          + "- 크기: " + sizeText + "\n"
+          + "- 채움율: " + inf + "%\n"
+          + "- 추정 부피: " + r.volCm3.toFixed(1) + " cm³\n"
+          + "- 필라멘트: " + Math.round(r.filGrams) + "g\n"
+          + "- 예상 출력 시간: " + formatTime(r.printMin) + "\n"
+          + "- 예상 견적: " + fmt(r.low) + "원 ~ " + fmt(r.high) + "원\n\n"
+          + "상세 상담 부탁드립니다."
+      });
+    });
   });
 })();
+</script>
+
+<!-- Three.js 3D 뷰어 & STL 로직 (ES Module) -->
+<script type="module">
+import * as THREE from "three";
+import { STLLoader } from "three/addons/loaders/STLLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const $ = (s) => document.querySelector(s);
+const dropzone      = $("#stl-dropzone");
+const fileInput     = $("#stl-input");
+const fileInfo      = $("#stl-file-info");
+const filenameEl    = $("#stl-filename");
+const removeBtn     = $("#stl-remove-btn");
+const viewerWrap    = $("#viewer-container");
+const canvas        = $("#stl-viewer");
+const viewerInfoEl  = $("#viewer-info");
+const calcStlBtn    = $("#calc-stl-btn");
+const FIXED_INFILL  = 5;
+
+let scene, camera, renderer, controls, meshObj;
+let stlVolumeMm3 = 0;
+let stlBbox = null;
+
+function initViewer() {
+  if (renderer) return;
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf8fafc);
+
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  camera = new THREE.PerspectiveCamera(45, 1, 0.1, 10000);
+  camera.position.set(0, 0, 200);
+
+  controls = new OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  dirLight.position.set(1, 2, 3);
+  scene.add(dirLight);
+  const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.3);
+  dirLight2.position.set(-1, -1, -2);
+  scene.add(dirLight2);
+
+  function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  resizeViewer();
+  window.addEventListener("resize", resizeViewer);
+}
+
+function resizeViewer() {
+  if (!renderer) return;
+  const w = viewerWrap.clientWidth;
+  const h = Math.min(w * 0.65, 400);
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+
+function computeVolumeMm3(geometry) {
+  const pos = geometry.attributes.position;
+  const vA = new THREE.Vector3(), vB = new THREE.Vector3(), vC = new THREE.Vector3();
+  let sum = 0;
+  for (let i = 0; i < pos.count; i += 3) {
+    vA.fromBufferAttribute(pos, i);
+    vB.fromBufferAttribute(pos, i + 1);
+    vC.fromBufferAttribute(pos, i + 2);
+    sum += vA.dot(vB.cross(vC)) / 6;
+  }
+  return Math.abs(sum);
+}
+
+function loadSTL(arrayBuffer, filename) {
+  initViewer();
+  viewerWrap.classList.remove("hidden");
+  fileInfo.classList.remove("hidden");
+  filenameEl.textContent = filename;
+  calcStlBtn.disabled = false;
+
+  if (meshObj) { scene.remove(meshObj); meshObj.geometry.dispose(); meshObj.material.dispose(); }
+
+  const loader = new STLLoader();
+  const geometry = loader.parse(arrayBuffer);
+  geometry.computeBoundingBox();
+
+  const bb = geometry.boundingBox;
+  const size = new THREE.Vector3();
+  bb.getSize(size);
+  const center = new THREE.Vector3();
+  bb.getCenter(center);
+
+  stlBbox = { x: size.x, y: size.y, z: size.z };
+  stlVolumeMm3 = computeVolumeMm3(geometry);
+
+  viewerInfoEl.textContent =
+    `크기: ${size.x.toFixed(1)} × ${size.y.toFixed(1)} × ${size.z.toFixed(1)} mm | 부피: ${(stlVolumeMm3 / 1000).toFixed(1)} cm³`;
+
+  const material = new THREE.MeshPhongMaterial({
+    color: 0x3b82f6,
+    specular: 0x444444,
+    shininess: 40,
+    flatShading: false,
+  });
+  geometry.computeVertexNormals();
+  meshObj = new THREE.Mesh(geometry, material);
+  meshObj.position.sub(center);
+  scene.add(meshObj);
+
+  const maxDim = Math.max(size.x, size.y, size.z);
+  camera.position.set(0, 0, maxDim * 2);
+  camera.lookAt(0, 0, 0);
+  controls.target.set(0, 0, 0);
+  controls.update();
+
+  resizeViewer();
+}
+
+function clearSTL() {
+  if (meshObj) { scene.remove(meshObj); meshObj.geometry.dispose(); meshObj.material.dispose(); meshObj = null; }
+  viewerWrap.classList.add("hidden");
+  fileInfo.classList.add("hidden");
+  filenameEl.textContent = "";
+  viewerInfoEl.textContent = "";
+  calcStlBtn.disabled = true;
+  stlVolumeMm3 = 0;
+  stlBbox = null;
+  fileInput.value = "";
+  $("#result-card").classList.remove("visible");
+}
+
+/* ── Drag & Drop ── */
+dropzone.addEventListener("click", () => fileInput.click());
+
+dropzone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropzone.classList.add("dragover");
+});
+dropzone.addEventListener("dragleave", () => {
+  dropzone.classList.remove("dragover");
+});
+dropzone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropzone.classList.remove("dragover");
+  const file = e.dataTransfer.files[0];
+  if (file && /\.stl$/i.test(file.name)) handleFile(file);
+});
+
+fileInput.addEventListener("change", () => {
+  if (fileInput.files[0]) handleFile(fileInput.files[0]);
+});
+
+removeBtn.addEventListener("click", clearSTL);
+
+function handleFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => loadSTL(reader.result, file.name);
+  reader.readAsArrayBuffer(file);
+}
+
+/* ── STL Calculate Button ── */
+calcStlBtn.addEventListener("click", () => {
+  if (!stlVolumeMm3 || !stlBbox) return;
+
+  const overlay   = $("#loading-overlay");
+  const barFill   = $("#loading-bar-fill");
+  const stepEl    = $("#loading-step");
+  const textEl    = $("#loading-text");
+
+  const steps = [
+    { text: "메쉬 분석 중", pct: 20 },
+    { text: "부피 계산 중", pct: 40 },
+    { text: "재료 소요량 분석 중", pct: 60 },
+    { text: "출력 시간 추정 중", pct: 80 },
+    { text: "견적 산출 중", pct: 95 },
+    { text: "완료!", pct: 100 },
+  ];
+
+  overlay.classList.remove("hidden");
+  barFill.style.width = "0%";
+  stepEl.textContent = steps[0].text;
+  textEl.textContent = "STL 모델을 분석하고 있습니다...";
+
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < steps.length) {
+      barFill.style.width = steps[i].pct + "%";
+      stepEl.textContent = steps[i].text;
+      i++;
+    } else {
+      clearInterval(interval);
+      setTimeout(() => {
+        overlay.classList.add("hidden");
+
+        const inf = FIXED_INFILL;
+        const r = window.estimateFromSTL(stlVolumeMm3, stlBbox, inf);
+
+        const formatTime = (min) => {
+          if (min < 60) return "약 " + Math.max(1, Math.round(min)) + "분";
+          const h = Math.floor(min / 60);
+          const m = Math.round(min % 60);
+          if (m < 5) return "약 " + h + "시간";
+          return "약 " + h + "시간 " + m + "분";
+        };
+        const fmt = (n) => Math.round(n).toLocaleString("ko-KR");
+
+        window.showResult(r, {
+          bbox: stlBbox,
+          emailBody: "안녕하세요, 3D 프린팅 견적 문의드립니다.\n\n"
+            + "- 파일: " + filenameEl.textContent + "\n"
+            + "- 크기: " + stlBbox.x.toFixed(1) + " × " + stlBbox.y.toFixed(1) + " × " + stlBbox.z.toFixed(1) + " mm\n"
+            + "- 채움율: " + inf + "%\n"
+            + "- STL 부피: " + r.volCm3.toFixed(1) + " cm³\n"
+            + "- 필라멘트: " + Math.round(r.filGrams) + "g\n"
+            + "- 예상 출력 시간: " + formatTime(r.printMin) + "\n"
+            + "- 예상 견적: " + fmt(r.low) + "원 ~ " + fmt(r.high) + "원\n\n"
+            + "상세 상담 부탁드립니다."
+        });
+      }, 300);
+    }
+  }, 400);
+});
 </script>
 </body>
 </html>
