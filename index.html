@@ -1271,50 +1271,16 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
 
   function handleKakaoClick(e){
     e.preventDefault();
-    if(!lastResult){
-      window.open(CONFIG.KAKAO_CHANNEL+"/chat", "_blank");
-      return;
+
+    if(lastResult){
+      buildQuoteImage(function(blob){
+        downloadBlob(blob);
+        showToast("견적서 이미지가 저장되었습니다. 채팅에서 첨부해주세요!");
+      });
     }
 
     if(window.Kakao && Kakao.isInitialized()){
-      var mc = getModelingCost();
-      var needsModeling = selectedTier!=="none" && selectedTier!=="custom";
-      var isCustom = selectedTier==="custom";
-      var totalLow, totalHigh, totalText;
-
-      if(isCustom){
-        totalText = "추후 협의";
-      } else {
-        totalLow = mc.fee + lastResult.low;
-        totalHigh = mc.fee + lastResult.high;
-        totalText = fmt(totalLow)+"원 ~ "+fmt(totalHigh)+"원";
-      }
-
-      var descParts = [];
-      if(needsModeling) descParts.push("모델링: "+fmt(mc.fee)+"원");
-      descParts.push("출력: "+fmt(lastResult.low)+"~"+fmt(lastResult.high)+"원");
-      descParts.push("부피: "+lastResult.volCm3.toFixed(1)+"cm³");
-      descParts.push("필라멘트: "+Math.round(lastResult.filGrams)+"g");
-
-      Kakao.Share.sendDefault({
-        objectType: "feed",
-        content: {
-          title: "3D 프린팅 견적서 — 어울,림",
-          description: "예상 금액: "+totalText+"\n"+descParts.join(" / "),
-          imageUrl: "https://eoulrimstudio.com/og-image.png",
-          link: {
-            mobileWebUrl: window.location.href,
-            webUrl: window.location.href
-          }
-        },
-        buttons: [{
-          title: "견적서 확인하기",
-          link: {
-            mobileWebUrl: window.location.href,
-            webUrl: window.location.href
-          }
-        }]
-      });
+      Kakao.Channel.chat({ channelPublicId: "_ACNxon" });
     } else {
       window.open(CONFIG.KAKAO_CHANNEL+"/chat", "_blank");
     }
