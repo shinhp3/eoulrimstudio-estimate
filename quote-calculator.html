@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js"></script>
 <script type="importmap">
 {
   "imports": {
@@ -20,10 +22,10 @@
 <body>
 
 <!-- ── Navbar ── -->
-<nav class="navbar">
+<nav class="navbar" role="banner">
   <a class="navbar-brand" href="#">
     <div class="navbar-logo-mark">
-      <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M10 2L3 6v8l7 4 7-4V6L10 2z"/><path d="M10 2v12M3 6l7 4 7-4"/>
       </svg>
     </div>
@@ -38,235 +40,331 @@
   <header class="hero">
     <div class="hero-badge">PLA 소재 전용</div>
     <h1><em>3D 프린팅</em><br>견적 계산기</h1>
-    <p class="hero-sub">치수 또는 STL 파일로 <strong>즉시 출력 비용을 확인</strong>하세요.</p>
+    <p class="hero-sub">STL 파일이나 간단한 치수만으로 <strong>3D 프린팅 예상 비용</strong>을 확인해보세요.</p>
+    <p class="hero-subcopy">출력 난이도와 형상에 따라 실제 견적은 상담 후 확정됩니다.</p>
+    <div class="hero-trust">
+      <span class="hero-trust-item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+        PLA 출력
+      </span>
+      <span class="hero-trust-item">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        STL 지원
+      </span>
+      <span class="hero-trust-item">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        카카오 상담
+      </span>
+      <span class="hero-trust-item">
+        <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4a2 2 0 0 1 2 2v7l-3-2h-3"/></svg>
+        전국 배송
+      </span>
+    </div>
   </header>
 
   <!-- ══════════════════════════════════════════
-       STEP 1 : 진입 선택
+       메인 레이아웃
   ══════════════════════════════════════════ -->
-  <section class="entry-section" id="entry-section">
-    <p class="entry-question">어떻게 시작할까요?</p>
-    <div class="entry-cards">
+  <div class="main-layout" id="main-layout">
 
-      <!-- STL 업로드 -->
-      <button class="entry-card" id="btn-choose-stl" type="button">
-        <div class="entry-card-visual">
-          <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M24 5L6 15v18l18 10 18-10V15L24 5z"/>
-            <path d="M24 5v23M6 15l18 10 18-10"/>
-          </svg>
-        </div>
-        <div class="entry-card-body">
-          <span class="entry-card-tag">더 정확함</span>
-          <div class="entry-card-title">STL 파일 업로드</div>
-          <div class="entry-card-desc">3D 파일로<br>정밀 견적을 받아요</div>
-          <ul class="entry-card-features">
-            <li>3D 미리보기 제공</li>
-            <li>오차 ±10% 이내</li>
-          </ul>
-        </div>
+  <div class="flow-section" id="flow-section">
+
+    <!-- 브레드크럼 -->
+    <nav class="step-breadcrumb" id="step-breadcrumb" aria-label="견적 진행 단계">
+      <button class="step-crumb active" data-step="1" type="button" aria-current="step">
+        <span class="step-crumb-top"><span class="step-crumb-num">1</span><span class="step-crumb-title">입력 방식</span></span>
+        <span class="step-crumb-value" id="crumb-val-1"></span>
       </button>
-
-      <!-- 치수 입력 -->
-      <button class="entry-card" id="btn-choose-manual" type="button">
-        <div class="entry-card-visual">
-          <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="18" width="40" height="14" rx="3"/>
-            <path d="M12 18v7M20 18v5M28 18v7M36 18v5"/>
-          </svg>
-        </div>
-        <div class="entry-card-body">
-          <span class="entry-card-tag">빠른 견적</span>
-          <div class="entry-card-title">치수로 계산하기</div>
-          <div class="entry-card-desc">파일 없이<br>바로 확인해요</div>
-          <ul class="entry-card-features">
-            <li>파일 없이 즉시 확인</li>
-            <li>기본 형태 선택</li>
-          </ul>
-        </div>
+      <span class="step-crumb-sep"></span>
+      <button class="step-crumb" data-step="2" type="button" disabled>
+        <span class="step-crumb-top"><span class="step-crumb-num">2</span><span class="step-crumb-title">모델링</span></span>
+        <span class="step-crumb-value" id="crumb-val-2"></span>
       </button>
+      <span class="step-crumb-sep"></span>
+      <button class="step-crumb" data-step="3" type="button" disabled>
+        <span class="step-crumb-top"><span class="step-crumb-num">3</span><span class="step-crumb-title">형태·치수</span></span>
+        <span class="step-crumb-value" id="crumb-val-3"></span>
+      </button>
+    </nav>
 
+    <!-- ═══ Step 1: 입력 방식 선택 ═══ -->
+    <div class="step-panel" id="step-1">
+      <div class="card">
+        <div class="section-title">견적 방식을 선택하세요</div>
+        <div class="entry-cards">
+          <button class="entry-card" id="btn-choose-stl" type="button" aria-label="STL 파일 업로드로 견적 계산">
+            <div class="entry-card-visual">
+              <svg viewBox="0 0 48 48" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M24 5L6 15v18l18 10 18-10V15L24 5z"/>
+                <path d="M24 5v23M6 15l18 10 18-10"/>
+              </svg>
+            </div>
+            <div class="entry-card-body">
+              <div class="entry-card-title">STL 파일 업로드</div>
+              <div class="entry-card-desc">3D 파일로 정밀 견적</div>
+            </div>
+          </button>
+          <button class="entry-card" id="btn-choose-manual" type="button" aria-label="치수 입력으로 견적 계산">
+            <div class="entry-card-visual">
+              <svg viewBox="0 0 48 48" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="18" width="40" height="14" rx="3"/>
+                <path d="M12 18v7M20 18v5M28 18v7M36 18v5"/>
+              </svg>
+            </div>
+            <div class="entry-card-body">
+              <div class="entry-card-title">치수로 계산하기</div>
+              <div class="entry-card-desc">파일 없이 빠른 견적</div>
+            </div>
+          </button>
+        </div>
+      </div>
     </div>
-  </section>
 
-  <!-- ══════════════════════════════════════════
-       STEP 2 : 입력 (진입 선택 후 표시)
-  ══════════════════════════════════════════ -->
-  <div class="flow-section hidden" id="flow-section">
+    <!-- ═══ Step 2: 모델링 선택 ═══ -->
+    <div class="step-panel hidden" id="step-2">
+      <div class="card">
+        <div class="section-title">모델링 서비스를 선택하세요</div>
+        <div class="section-subtitle">만들고 싶은 형태의 복잡도에 따라 등급을 선택해주세요.</div>
 
-    <!-- STL 패널 -->
-    <div class="card hidden" id="panel-stl">
-      <div class="card-header">
-        <button class="back-btn" id="back-btn-stl" type="button">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>
-          다시 선택
-        </button>
-        <span class="card-header-title">STL 파일 업로드</span>
-      </div>
-
-      <div class="stl-dropzone" id="stl-dropzone">
-        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/>
-          <line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-        <p class="dropzone-text">STL 파일을 드롭하거나 클릭해 선택</p>
-        <p class="dropzone-hint">.stl 파일만 지원됩니다</p>
-        <input type="file" id="stl-input" accept=".stl" hidden>
-      </div>
-      <div class="stl-file-info hidden" id="stl-file-info">
-        <span class="stl-filename" id="stl-filename"></span>
-        <button class="stl-remove-btn" id="stl-remove-btn" type="button">✕ 제거</button>
-      </div>
-      <div class="viewer-container hidden" id="viewer-container">
-        <canvas id="stl-viewer"></canvas>
-        <div class="viewer-info" id="viewer-info"></div>
-        <div class="viewer-controls">
-          <div class="viewer-guide">
-            <span class="viewer-guide-item"><span class="viewer-guide-key">드래그</span>회전</span>
-            <span class="viewer-guide-item"><span class="viewer-guide-key">휠</span>확대</span>
+        <div class="modeling-intro" id="go-stl-card">
+          <div class="go-stl-inner">
+            <div class="go-stl-text">
+              <strong>이미 3D 파일이 있으신가요?</strong>
+              <span>STL 파일을 업로드하면 모델링 없이 바로 견적을 확인할 수 있어요.</span>
+            </div>
+            <button type="button" id="go-stl-link" class="go-stl-btn">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6M9 15l3-3 3 3"/></svg>
+              STL 업로드로 이동
+            </button>
           </div>
-          <button class="viewer-reset-btn" id="viewer-reset-btn" type="button">↺ 초기화</button>
         </div>
-      </div>
 
-      <button class="btn btn-primary" id="calc-stl-btn" type="button" disabled>견적 계산하기</button>
+        <!-- 추천 질문 -->
+        <div class="recommend-wizard" id="recommend-wizard">
+          <div class="recommend-question">어떤 형태를 만들고 싶으신가요?</div>
+          <div class="recommend-options">
+            <button class="recommend-opt" data-recommend="lite" type="button">
+              <div class="recommend-opt-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
+              <span class="recommend-opt-text">단순 도형 (박스, 원통, 기본 형태)</span>
+            </button>
+            <button class="recommend-opt" data-recommend="standard" type="button">
+              <div class="recommend-opt-icon"><svg viewBox="0 0 24 24"><path d="M12 3c-1.5 0-3.5 2-4 5s0 4 0 7 2 5 4 5 4-2 4-5 .5-4 0-7-2.5-5-4-5z"/></svg></div>
+              <span class="recommend-opt-text">곡면 포함 (생활소품, 제품 형태)</span>
+            </button>
+            <button class="recommend-opt" data-recommend="premium" type="button">
+              <div class="recommend-opt-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <span class="recommend-opt-text">복잡한 외형 (피규어, 장식품)</span>
+            </button>
+            <button class="recommend-opt" data-recommend="custom" type="button">
+              <div class="recommend-opt-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div>
+              <span class="recommend-opt-text">정밀 결합 / 분할 출력 / 여러 파트</span>
+            </button>
+          </div>
+          <div class="recommend-result hidden" id="recommend-result">
+            <div class="recommend-result-title" id="recommend-result-title"></div>
+            <div class="recommend-result-desc" id="recommend-result-desc"></div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="step2-next-btn" type="button" disabled>다음</button>
+      </div>
     </div>
 
-    <!-- 수동 입력 패널 -->
-    <div class="card hidden" id="panel-manual">
-      <div class="card-header">
-        <button class="back-btn" id="back-btn-manual" type="button">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>
-          다시 선택
-        </button>
-        <span class="card-header-title">치수 입력</span>
+    <!-- ═══ Step 3: 형태 + 치수 ═══ -->
+    <div class="step-panel hidden" id="step-3">
+      <div class="card">
+        <div class="section-title">형태 선택</div>
+        <div class="shape-grid" id="shape-grid" role="radiogroup" aria-label="출력 형태 선택">
+          <button class="shape-btn" data-shape="cup" type="button" role="radio" aria-checked="false" aria-pressed="false">
+            <svg viewBox="0 0 24 24"><path d="M5 3h14v13c0 2.2-2.7 4-7 4s-7-1.8-7-4V3z"/><path d="M19 7h1.5a2.5 2.5 0 0 1 0 5H19"/></svg>
+            <span>컵</span>
+          </button>
+          <button class="shape-btn" data-shape="plate" type="button" role="radio" aria-checked="false" aria-pressed="false">
+            <svg viewBox="0 0 24 24"><ellipse cx="12" cy="10" rx="10" ry="3.5"/><path d="M2 10c0 3 4.5 5.5 10 5.5s10-2.5 10-5.5"/></svg>
+            <span>접시</span>
+          </button>
+          <button class="shape-btn" data-shape="bowl" type="button" role="radio" aria-checked="false" aria-pressed="false">
+            <svg viewBox="0 0 24 24"><path d="M2 10c0 5.5 4.5 10 10 10s10-4.5 10-10"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <span>볼/그릇</span>
+          </button>
+          <button class="shape-btn" data-shape="etc" type="button" role="radio" aria-checked="false" aria-pressed="false">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+            <span>기타</span>
+          </button>
+        </div>
+
+        <hr class="divider">
+
+        <div class="section-title">치수 입력</div>
+        <div class="dim-grid two-fields" id="dim-grid">
+          <div class="field" id="field-x">
+            <label for="dim-x" id="label-x">지름 (D)</label>
+            <input type="number" id="dim-x" min="1" placeholder="0" inputmode="numeric" aria-describedby="dim-x-error">
+            <span class="unit">mm</span>
+            <span class="error-msg" id="dim-x-error" role="alert"></span>
+            <span class="warning-msg" id="dim-x-warn"></span>
+          </div>
+          <div class="field hidden" id="field-y">
+            <label for="dim-y" id="label-y">세로 (Y)</label>
+            <input type="number" id="dim-y" min="1" placeholder="0" inputmode="numeric" aria-describedby="dim-y-error">
+            <span class="unit">mm</span>
+            <span class="error-msg" id="dim-y-error" role="alert"></span>
+          </div>
+          <div class="field" id="field-z">
+            <label for="dim-z" id="label-z">높이 (H)</label>
+            <input type="number" id="dim-z" min="1" placeholder="0" inputmode="numeric" aria-describedby="dim-z-error">
+            <span class="unit">mm</span>
+            <span class="error-msg" id="dim-z-error" role="alert"></span>
+            <span class="warning-msg" id="dim-z-warn"></span>
+          </div>
+        </div>
+
+        <div class="rt-preview hidden" id="rt-preview">
+          <div class="rt-header">입력값 기준 예상 정보</div>
+          <div class="rt-item"><span class="rt-label">추정 부피</span><span class="rt-value" id="rt-vol">—</span></div>
+          <div class="rt-item"><span class="rt-label">필라멘트</span><span class="rt-value" id="rt-fil">—</span></div>
+          <div class="rt-item"><span class="rt-label">출력 시간</span><span class="rt-value" id="rt-time">—</span></div>
+        </div>
+
+        <button class="btn btn-primary" id="calc-btn" type="button">견적 계산하기</button>
       </div>
-
-      <div class="section-title">형태 선택</div>
-      <div class="shape-grid" id="shape-grid">
-        <button class="shape-btn active" data-shape="cylinder" type="button">
-          <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/></svg>
-          <span>원기둥</span>
-        </button>
-        <button class="shape-btn" data-shape="cup" type="button">
-          <svg viewBox="0 0 24 24"><path d="M5 3h14v13c0 2.2-2.7 4-7 4s-7-1.8-7-4V3z"/><path d="M19 7h1.5a2.5 2.5 0 0 1 0 5H19"/></svg>
-          <span>컵</span>
-        </button>
-        <button class="shape-btn" data-shape="plate" type="button">
-          <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="10" ry="3.5"/><path d="M2 15c0-3 4.5-5.5 10-5.5s10 2.5 10 5.5"/></svg>
-          <span>접시</span>
-        </button>
-        <button class="shape-btn" data-shape="bowl" type="button">
-          <svg viewBox="0 0 24 24"><path d="M2 10c0 5.5 4.5 10 10 10s10-4.5 10-10"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          <span>볼/그릇</span>
-        </button>
-      </div>
-
-      <hr class="divider">
-
-      <div class="section-title">치수 입력</div>
-      <div class="dim-grid two-fields" id="dim-grid">
-        <div class="field" id="field-x">
-          <label for="dim-x" id="label-x">지름 (D)</label>
-          <input type="number" id="dim-x" min="1" placeholder="0" inputmode="numeric">
-          <span class="unit">mm</span>
-          <span class="error-msg"></span>
-        </div>
-        <div class="field hidden" id="field-y">
-          <label for="dim-y" id="label-y">세로 (Y)</label>
-          <input type="number" id="dim-y" min="1" placeholder="0" inputmode="numeric">
-          <span class="unit">mm</span>
-          <span class="error-msg"></span>
-        </div>
-        <div class="field" id="field-z">
-          <label for="dim-z" id="label-z">높이 (H)</label>
-          <input type="number" id="dim-z" min="1" placeholder="0" inputmode="numeric">
-          <span class="unit">mm</span>
-          <span class="error-msg"></span>
-        </div>
-      </div>
-
-      <!-- 실시간 미리보기 -->
-      <div class="rt-preview hidden" id="rt-preview">
-        <div class="rt-header">실시간 미리보기</div>
-        <div class="rt-item">
-          <span class="rt-label">추정 부피</span>
-          <span class="rt-value" id="rt-vol">—</span>
-        </div>
-        <div class="rt-item">
-          <span class="rt-label">필라멘트</span>
-          <span class="rt-value" id="rt-fil">—</span>
-        </div>
-        <div class="rt-item">
-          <span class="rt-label">출력 시간</span>
-          <span class="rt-value" id="rt-time">—</span>
-        </div>
-      </div>
-
-      <button class="btn btn-primary" id="calc-btn" type="button">견적 계산하기</button>
     </div>
 
-    <!-- 모델링 서비스 선택 -->
-    <div class="card" id="modeling-card">
-      <div class="section-title">모델링 서비스가 필요하신가요?</div>
-      <div class="tier-scroll-wrap">
-        <div class="tier-grid" id="tier-grid">
-
-          <button class="tier-btn active" data-tier="none" type="button">
-            <div class="tier-icon">
-              <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            </div>
-            <span class="tier-name">모델 보유</span>
-            <span class="tier-desc">STL 있음</span>
-            <span class="tier-price">₩0</span>
-          </button>
-
-          <button class="tier-btn" data-tier="lite" type="button">
-            <div class="tier-icon">
-              <svg viewBox="0 0 24 24"><rect x="3" y="7" width="10" height="10" rx="1"/><rect x="9" y="3" width="10" height="10" rx="1"/><line x1="3" y1="7" x2="9" y2="3"/><line x1="13" y1="7" x2="19" y2="3"/><line x1="13" y1="17" x2="19" y2="13"/></svg>
-            </div>
-            <span class="tier-name">Lite</span>
-            <span class="tier-desc">단순 도형</span>
-            <span class="tier-price">₩50,000</span>
-          </button>
-
-          <button class="tier-btn" data-tier="standard" type="button">
-            <div class="tier-icon">
-              <svg viewBox="0 0 24 24"><path d="M12 3c-1.5 0-3.5 2-4 5s0 4 0 7 2 5 4 5 4-2 4-5 .5-4 0-7-2.5-5-4-5z"/></svg>
-            </div>
-            <span class="tier-name">Standard</span>
-            <span class="tier-desc">곡면 포함</span>
-            <span class="tier-price">₩80,000</span>
-            <span class="tier-recommend">추천</span>
-          </button>
-
-          <button class="tier-btn" data-tier="premium" type="button">
-            <div class="tier-icon">
-              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            </div>
-            <span class="tier-name">Premium</span>
-            <span class="tier-desc">피규어·장식</span>
-            <span class="tier-price">₩150,000</span>
-          </button>
-
-          <button class="tier-btn" data-tier="custom" type="button">
-            <div class="tier-icon">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-            </div>
-            <span class="tier-name">Custom</span>
-            <span class="tier-desc">정밀·분할</span>
-            <span class="tier-price">협의</span>
-          </button>
-
+    <!-- ═══ STL 패널 ═══ -->
+    <div class="step-panel hidden" id="panel-stl">
+      <div class="card">
+        <div class="stl-dropzone" id="stl-dropzone" role="button" tabindex="0" aria-label="STL 파일 업로드 영역">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <p class="dropzone-text">STL 파일을 드롭하거나 클릭해 선택</p>
+          <p class="dropzone-hint">모델 방향에 따라 실제 출력 시간은 달라질 수 있습니다</p>
+          <div class="dropzone-specs">
+            <span>지원: .stl</span>
+            <span>최대 50MB</span>
+          </div>
+          <input type="file" id="stl-input" accept=".stl" hidden>
         </div>
+        <div class="stl-file-info hidden" id="stl-file-info">
+          <span class="stl-filename" id="stl-filename"></span>
+          <button class="stl-remove-btn" id="stl-remove-btn" type="button" aria-label="파일 제거">✕ 제거</button>
+        </div>
+        <div class="viewer-container hidden" id="viewer-container">
+          <canvas id="stl-viewer" aria-label="3D 모델 뷰어"></canvas>
+          <div class="viewer-info" id="viewer-info"></div>
+          <div class="viewer-controls">
+            <div class="viewer-guide">
+              <span class="viewer-guide-item"><span class="viewer-guide-key">드래그</span>회전</span>
+              <span class="viewer-guide-item"><span class="viewer-guide-key">휠</span>확대</span>
+            </div>
+            <button class="viewer-reset-btn" id="viewer-reset-btn" type="button" aria-label="뷰 초기화">↺ 초기화</button>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="calc-stl-btn" type="button" disabled>견적 계산하기</button>
       </div>
     </div>
 
   </div><!-- /flow-section -->
 
+  <!-- ══════════════════════════════════════════
+       사이드 패널 (Desktop)
+  ══════════════════════════════════════════ -->
+  <aside class="side-panel" id="side-panel" aria-label="견적 요약">
+    <div class="order-summary" id="result-card">
+
+      <div class="order-summary-header">
+        <div class="order-summary-title">예상 견적</div>
+        <div class="order-summary-meta">PLA · 5% infill · 참고 견적</div>
+      </div>
+      <div class="order-step-badge">Step 4 · 견적 확인</div>
+      <div class="result-updated hidden" id="result-updated">견적이 업데이트되었습니다</div>
+
+      <div class="side-placeholder" id="side-placeholder">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 7h6M9 11h6M9 15h4"/>
+          <rect x="4" y="3" width="16" height="18" rx="2"/>
+        </svg>
+        <p>치수를 입력하거나 STL 파일을<br>업로드하면 견적이 여기에 표시됩니다</p>
+      </div>
+
+      <!-- 가격 내역 -->
+      <div class="order-lines hidden" id="price-breakdown">
+        <div class="order-line">
+          <span class="order-line-label">모델링 비용</span>
+          <span class="order-line-value" id="modeling-price">—</span>
+        </div>
+        <div class="order-line">
+          <span class="order-line-label">출력 비용</span>
+          <span class="order-line-value" id="printing-price">—</span>
+        </div>
+        <div class="order-divider"></div>
+        <div class="order-line order-total">
+          <span class="order-line-label">총 예상 금액</span>
+          <span class="order-line-value" id="total-price">—</span>
+        </div>
+      </div>
+
+      <div class="order-lines" id="price-display-simple">
+        <div class="order-line order-total">
+          <span class="order-line-label">예상 출력 비용</span>
+          <span class="order-line-value" id="price-value">—</span>
+        </div>
+      </div>
+
+      <!-- 상세 스펙 -->
+      <div class="order-details" id="order-details-section">
+        <button class="order-details-toggle" id="details-toggle" type="button" aria-expanded="true">
+          상세 정보
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="order-details-body" id="details-body">
+          <div class="order-detail-row">
+            <span>추정 부피</span><span id="vol-info">—</span>
+          </div>
+          <div class="order-detail-row">
+            <span>필라멘트</span><span id="fil-info">—</span>
+          </div>
+          <div class="order-detail-row">
+            <span>출력 시간</span><span id="time-info">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="order-details" id="stl-dims-grid" style="display:none">
+        <div class="order-detail-row">
+          <span>X (가로)</span><span id="dim-x-info">—</span>
+        </div>
+        <div class="order-detail-row">
+          <span>Y (세로)</span><span id="dim-y-info">—</span>
+        </div>
+        <div class="order-detail-row">
+          <span>Z (높이)</span><span id="dim-z-info">—</span>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="order-cta">
+        <a class="order-btn order-btn-kakao" id="contact-kakao" href="http://pf.kakao.com/_ACNxon/chat" target="_blank" rel="noopener" aria-label="카카오톡으로 문의하기">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+            <path d="M9 1.5C4.86 1.5 1.5 4.14 1.5 7.41c0 2.07 1.26 3.9 3.18 4.98L3.9 15.3c-.09.27.18.51.42.36l3.57-2.37c.36.03.72.06 1.11.06 4.14 0 7.5-2.64 7.5-5.91S13.14 1.5 9 1.5z"/>
+          </svg>
+          카카오톡 문의하기
+        </a>
+        <a class="order-btn order-btn-email" id="contact-btn" href="#" aria-label="이메일로 견적 받기">
+          이메일로 견적 받기
+        </a>
+      </div>
+
+      <p class="order-notice">형상 복잡도, 서포트 구조, 후가공 여부에 따라 실제 금액은 달라질 수 있습니다. 카카오톡으로 파일 확인 후 최종 견적이 확정됩니다.</p>
+    </div>
+  </aside>
+
+  </div><!-- /main-layout -->
+
   <!-- ── 로딩 오버레이 ── -->
-  <div class="loading-overlay hidden" id="loading-overlay">
+  <div class="loading-overlay hidden" id="loading-overlay" aria-live="polite">
     <div class="loading-card">
       <div class="loading-spinner"></div>
       <p class="loading-text" id="loading-text">모델을 분석하고 있습니다...</p>
@@ -277,157 +375,222 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════
-       STEP 3 : 결과
-  ══════════════════════════════════════════ -->
-  <div class="result-section hidden" id="result-section">
-
-    <!-- 가격 + CTA 카드 -->
-    <div class="result-card" id="result-card">
-      <div class="result-header">
-        <div class="result-check">✓</div>
-        <div class="result-heading">견적 산출 완료</div>
-      </div>
-
-      <!-- 모델링 포함 내역 -->
-      <div class="calc-display hidden" id="price-breakdown">
-        <div class="calc-screen">
-          <div class="calc-line-item">
-            <span class="calc-line-op">&nbsp;</span>
-            <span class="calc-line-label">모델링</span>
-            <span class="calc-line-amount" id="modeling-price">—</span>
-          </div>
-          <div class="calc-line-item">
-            <span class="calc-line-op">+</span>
-            <span class="calc-line-label">출력</span>
-            <span class="calc-line-amount" id="printing-price">—</span>
-          </div>
-          <div class="calc-separator"></div>
-          <div class="calc-total-row">
-            <span class="calc-total-label">합계</span>
-            <span class="calc-total-amount" id="total-price">—</span>
-          </div>
+  <!-- 출력 서비스 안내 -->
+  <div class="card trust-card">
+    <div class="section-title">출력 서비스 안내</div>
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-icon-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/></svg>
+        </div>
+        <div>
+          <div class="trust-label">소재</div>
+          <div class="trust-value">PLA 기본 · 색상 상담 가능</div>
         </div>
       </div>
-
-      <!-- 출력만 (모델 보유) -->
-      <div class="price-display" id="price-display-simple">
-        <div class="price-label">예상 출력 비용</div>
-        <div class="price-value" id="price-value"></div>
+      <div class="trust-item">
+        <div class="trust-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M12 20V4M4 12l8-8 8 8"/></svg>
+        </div>
+        <div>
+          <div class="trust-label">품질</div>
+          <div class="trust-value">레이어 0.2mm · 형상별 서포트</div>
+        </div>
       </div>
+      <div class="trust-item">
+        <div class="trust-icon-wrap">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </div>
+        <div>
+          <div class="trust-label">납기</div>
+          <div class="trust-value">3~5 영업일 (크기에 따라 변동)</div>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon-wrap">
+          <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+        <div>
+          <div class="trust-label">배송</div>
+          <div class="trust-value">전국 택배 가능</div>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94L6.7 20.2a2.12 2.12 0 0 1-3-3l6.73-6.73a6 6 0 0 1 7.94-7.94z"/></svg>
+        </div>
+        <div>
+          <div class="trust-label">후가공</div>
+          <div class="trust-value">서포트 제거 · 샌딩/도색 별도</div>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div>
+          <div class="trust-label">상담</div>
+          <div class="trust-value">카카오톡 파일 확인 후 최종 확정</div>
+        </div>
+      </div>
+    </div>
 
-      <!-- CTA — 가장 중요한 액션, 즉시 노출 -->
-      <div class="cta-group">
-        <a class="btn btn-kakao" id="contact-kakao" href="https://pf.kakao.com/_eoulrim" target="_blank" rel="noopener">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
-            <path d="M9 1.5C4.86 1.5 1.5 4.14 1.5 7.41c0 2.07 1.26 3.9 3.18 4.98L3.9 15.3c-.09.27.18.51.42.36l3.57-2.37c.36.03.72.06 1.11.06 4.14 0 7.5-2.64 7.5-5.91S13.14 1.5 9 1.5z"/>
-          </svg>
-          카카오톡으로 문의
-        </a>
-        <a class="btn btn-email" id="contact-btn" href="#">
-          이메일로 견적 받기
-        </a>
+    <div class="trust-gallery">
+      <div class="trust-gallery-title">출력 가능 예시</div>
+      <div class="trust-gallery-grid">
+        <div class="trust-gallery-item">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v13c0 2.2-2.7 4-7 4s-7-1.8-7-4V3z"/></svg>
+          생활소품
+        </div>
+        <div class="trust-gallery-item">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          인테리어 오브제
+        </div>
+        <div class="trust-gallery-item">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          시제품
+        </div>
+        <div class="trust-gallery-item">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+          피규어·장식품
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">© 어울,림 Eoulrimstudio. All rights reserved.</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     모바일 하단 견적 바
+══════════════════════════════════════════ -->
+<div class="mobile-quote-bar" id="mobile-quote-bar" aria-label="견적 요약 바">
+  <div class="mobile-quote-bar-price">
+    <div class="mobile-quote-bar-label">예상 견적</div>
+    <div class="mobile-quote-bar-value" id="mobile-bar-price">—</div>
+  </div>
+  <button class="mobile-quote-bar-btn" id="mobile-bar-detail" type="button">상세보기</button>
+</div>
+
+<!-- 모바일 바텀 시트 -->
+<div class="bottom-sheet-overlay" id="sheet-overlay"></div>
+<div class="bottom-sheet" id="bottom-sheet" role="dialog" aria-modal="true" aria-label="상세 견적">
+  <div class="bottom-sheet-handle"></div>
+  <div class="bottom-sheet-title">상세 견적</div>
+  <div class="bottom-sheet-total">
+    <div class="bottom-sheet-total-label">총 예상 금액</div>
+    <div class="bottom-sheet-total-value" id="sheet-total">—</div>
+  </div>
+  <div class="bottom-sheet-lines" id="sheet-lines">
+    <div class="bottom-sheet-line"><span class="bottom-sheet-line-label">모델링 비용</span><span class="bottom-sheet-line-value" id="sheet-modeling">—</span></div>
+    <div class="bottom-sheet-line"><span class="bottom-sheet-line-label">출력 비용</span><span class="bottom-sheet-line-value" id="sheet-printing">—</span></div>
+    <div class="bottom-sheet-line"><span class="bottom-sheet-line-label">추정 부피</span><span class="bottom-sheet-line-value" id="sheet-vol">—</span></div>
+    <div class="bottom-sheet-line"><span class="bottom-sheet-line-label">필라멘트</span><span class="bottom-sheet-line-value" id="sheet-fil">—</span></div>
+    <div class="bottom-sheet-line"><span class="bottom-sheet-line-label">출력 시간</span><span class="bottom-sheet-line-value" id="sheet-time">—</span></div>
+  </div>
+  <div class="bottom-sheet-cta">
+    <a class="order-btn order-btn-kakao" id="sheet-kakao" href="http://pf.kakao.com/_ACNxon/chat" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+        <path d="M9 1.5C4.86 1.5 1.5 4.14 1.5 7.41c0 2.07 1.26 3.9 3.18 4.98L3.9 15.3c-.09.27.18.51.42.36l3.57-2.37c.36.03.72.06 1.11.06 4.14 0 7.5-2.64 7.5-5.91S13.14 1.5 9 1.5z"/>
+      </svg>
+      카카오톡 문의하기
+    </a>
+    <a class="order-btn order-btn-email" id="sheet-email" href="#">이메일로 견적 받기</a>
+  </div>
+  <p class="bottom-sheet-notice">형상 복잡도, 서포트 구조에 따라 실제 금액은 달라질 수 있습니다.</p>
+</div>
+
+<!-- ══════════════════════════════════════════
+     견적서 이미지 템플릿 (화면 밖 숨김)
+══════════════════════════════════════════ -->
+<div id="quote-image-wrap" style="position:fixed;left:-9999px;top:0;z-index:-1;">
+  <div id="quote-image-tpl" style="width:600px;padding:48px 40px;background:#fff;font-family:'Inter','Noto Sans KR',sans-serif;color:#0F172A;">
+    <!-- 헤더 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #E2E8F0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#2563EB,#60A5FA);display:flex;align-items:center;justify-content:center;">
+          <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L3 6v8l7 4 7-4V6L10 2z"/><path d="M10 2v12M3 6l7 4 7-4"/></svg>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:800;color:#0F172A;">어울,림 Eoulrimstudio</div>
+          <div style="font-size:11px;color:#64748B;">3D 프린팅 서비스</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px;color:#64748B;">발행일</div>
+        <div style="font-size:13px;font-weight:600;color:#0F172A;" id="qi-date"></div>
+      </div>
+    </div>
+
+    <!-- 제목 -->
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="font-size:22px;font-weight:800;color:#0F172A;letter-spacing:-0.03em;">3D 프린팅 견적서</div>
+      <div style="font-size:12px;color:#64748B;margin-top:4px;">ESTIMATE</div>
+    </div>
+
+    <!-- 금액 영역 -->
+    <div style="background:#F8F9FC;border:1px solid #E2E8F0;border-radius:12px;padding:24px;margin-bottom:24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <span style="font-size:13px;color:#64748B;font-weight:500;">모델링 비용</span>
+        <span style="font-size:14px;color:#0F172A;font-weight:600;" id="qi-modeling"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <span style="font-size:13px;color:#64748B;font-weight:500;">출력 비용</span>
+        <span style="font-size:14px;color:#0F172A;font-weight:600;" id="qi-printing"></span>
+      </div>
+      <div style="border-top:1px solid #E2E8F0;margin:12px 0;"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:14px;color:#0F172A;font-weight:700;">총 예상 금액</span>
+        <span style="font-size:20px;color:#0F172A;font-weight:800;" id="qi-total"></span>
       </div>
     </div>
 
     <!-- 상세 정보 -->
-    <div class="card">
-      <div class="section-title">상세 정보</div>
-      <div class="info-grid">
-        <div class="info-item">
-          <div class="info-label">추정 부피</div>
-          <div class="info-value" id="vol-info">—</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">필라멘트</div>
-          <div class="info-value" id="fil-info">—</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">예상 출력 시간</div>
-          <div class="info-value" id="time-info">—</div>
-        </div>
-      </div>
-      <div class="info-grid" id="stl-dims-grid" style="display:none">
-        <div class="info-item">
-          <div class="info-label">X (가로)</div>
-          <div class="info-value" id="dim-x-info">—</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Y (세로)</div>
-          <div class="info-value" id="dim-y-info">—</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Z (높이)</div>
-          <div class="info-value" id="dim-z-info">—</div>
-        </div>
+    <div style="margin-bottom:24px;">
+      <div style="font-size:12px;font-weight:700;color:#64748B;margin-bottom:12px;letter-spacing:0.04em;">상세 정보</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <tr style="border-bottom:1px solid #F1F5F9;">
+          <td style="padding:8px 0;color:#64748B;font-weight:500;width:100px;">형태</td>
+          <td style="padding:8px 0;color:#0F172A;font-weight:600;" id="qi-shape"></td>
+        </tr>
+        <tr style="border-bottom:1px solid #F1F5F9;">
+          <td style="padding:8px 0;color:#64748B;font-weight:500;">치수</td>
+          <td style="padding:8px 0;color:#0F172A;font-weight:600;" id="qi-dims"></td>
+        </tr>
+        <tr style="border-bottom:1px solid #F1F5F9;">
+          <td style="padding:8px 0;color:#64748B;font-weight:500;">추정 부피</td>
+          <td style="padding:8px 0;color:#0F172A;font-weight:600;" id="qi-vol"></td>
+        </tr>
+        <tr style="border-bottom:1px solid #F1F5F9;">
+          <td style="padding:8px 0;color:#64748B;font-weight:500;">필라멘트</td>
+          <td style="padding:8px 0;color:#0F172A;font-weight:600;" id="qi-fil"></td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;color:#64748B;font-weight:500;">예상 출력 시간</td>
+          <td style="padding:8px 0;color:#0F172A;font-weight:600;" id="qi-time"></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- 안내 -->
+    <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:12px 14px;margin-bottom:24px;">
+      <div style="font-size:11px;color:#92400E;line-height:1.5;">
+        ※ 본 견적은 참고용이며, 형상 복잡도·서포트 구조·후가공 여부에 따라 실제 금액은 달라질 수 있습니다. 카카오톡으로 파일을 보내주시면 최종 견적을 확정해드립니다.
       </div>
     </div>
 
-    <!-- 출력 안내 (신뢰 섹션) -->
-    <div class="card trust-card">
-      <div class="section-title">출력 안내</div>
-      <div class="trust-grid">
-        <div class="trust-item">
-          <div class="trust-icon-wrap">
-            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><circle cx="12" cy="10" r="3"/></svg>
-          </div>
-          <div>
-            <div class="trust-label">사용 장비</div>
-            <div class="trust-value">Bambu Lab X1C</div>
-          </div>
-        </div>
-        <div class="trust-item">
-          <div class="trust-icon-wrap">
-            <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-          </div>
-          <div>
-            <div class="trust-label">레이어 높이</div>
-            <div class="trust-value">0.10 ~ 0.20mm</div>
-          </div>
-        </div>
-        <div class="trust-item">
-          <div class="trust-icon-wrap">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/></svg>
-          </div>
-          <div>
-            <div class="trust-label">기본 소재</div>
-            <div class="trust-value">PLA (19가지 색상)</div>
-          </div>
-        </div>
-        <div class="trust-item">
-          <div class="trust-icon-wrap">
-            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          </div>
-          <div>
-            <div class="trust-label">평균 납기</div>
-            <div class="trust-value">3 ~ 5 영업일</div>
-          </div>
-        </div>
-        <div class="trust-item">
-          <div class="trust-icon-wrap">
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          </div>
-          <div>
-            <div class="trust-label">후가공</div>
-            <div class="trust-value">서포트 제거 기본</div>
-          </div>
-        </div>
-        <div class="trust-item">
-          <div class="trust-icon-wrap">
-            <svg viewBox="0 0 24 24"><path d="M5 12H19M5 12l4-4M5 12l4 4"/></svg>
-          </div>
-          <div>
-            <div class="trust-label">배송</div>
-            <div class="trust-value">전국 택배 가능</div>
-          </div>
-        </div>
-      </div>
+    <!-- 푸터 -->
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid #E2E8F0;">
+      <div style="font-size:11px;color:#94A3B8;">PLA · 5% infill · 레이어 0.2mm</div>
+      <div style="font-size:11px;color:#94A3B8;">카카오톡: @eoulrim</div>
     </div>
-
-    <p class="disclaimer">본 견적은 참고용이며 실제 가격은 상담 후 확정됩니다.<br>형상 복잡도 및 서포트 구조에 따라 달라질 수 있습니다.</p>
   </div>
+</div>
 
-  <footer class="footer">© 어울,림 Eoulrimstudio. All rights reserved.</footer>
+<!-- 토스트 알림 -->
+<div class="toast" id="copy-toast">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+  <span id="toast-msg">견적서가 저장되었습니다</span>
 </div>
 
 <!-- ════════════════════════════════════════
@@ -436,7 +599,7 @@
 <script>
 var CONFIG = {
   CONTACT_EMAIL:   "eoulrimstudio@gmail.com",
-  KAKAO_CHANNEL:   "https://pf.kakao.com/_eoulrim",
+  KAKAO_CHANNEL:   "http://pf.kakao.com/_ACNxon",
   FILAMENT_RATE:   40,
   MACHINE_RATE:    3000,
   MIN_PRICE:       10000,
@@ -450,28 +613,24 @@ var CONFIG = {
   LAYER_CHANGE_TIME:1.5,
   WALL_THICKNESS:  2.5,
   PLA_DENSITY:     1.24,
+  MAX_DIM:         240,
   MODELING: {
     none:     { fee: 0,      label: "모델 보유" },
     lite:     { fee: 50000,  label: "Lite (단순)" },
     standard: { fee: 80000,  label: "Standard (곡선·복합)" },
     premium:  { fee: 150000, label: "Premium (복잡·장식)" },
     custom:   { fee: 0,      label: "Custom (추후 협의)" },
-  }
+  },
+  KAKAO_JS_KEY: "6eabc21de89fdf6c3d9694f185de9b0f"
 };
 
+if(window.Kakao && !Kakao.isInitialized()){
+  Kakao.init(CONFIG.KAKAO_JS_KEY);
+}
+
 var SHAPES = {
-  box: {
-    name:"직육면체", labels:["가로 (X)","세로 (Y)","높이 (Z)"],
-    useY:true, solid:true,
-    volume:function(x,y,z){return x*y*z/1000;}
-  },
-  cylinder: {
-    name:"원기둥", labels:["지름 (D)",null,"높이 (H)"],
-    useY:false, solid:true,
-    volume:function(d,_,h){return Math.PI/4*d*d*h/1000;}
-  },
   cup: {
-    name:"컵", labels:["외경 (D)",null,"높이 (H)"],
+    name:"컵", labels:["지름 (D)",null,"높이 (H)"],
     useY:false, solid:false,
     volume:function(d,_,h){
       var R=d/2, W=CONFIG.WALL_THICKNESS, r=Math.max(R-W,0);
@@ -480,21 +639,25 @@ var SHAPES = {
     }
   },
   plate: {
-    name:"접시", labels:["지름 (D)",null,"두께 (H)"],
+    name:"접시", labels:["지름 (D)",null,"높이 (H)"],
     useY:false, solid:true,
     volume:function(d,_,h){return Math.PI/4*d*d*h/1000;}
   },
   bowl: {
-    name:"볼/그릇", labels:["지름 (D)",null,"깊이 (H)"],
+    name:"볼/그릇", labels:["지름 (D)",null,"높이 (H)"],
     useY:false, solid:false,
     volume:function(d,_,h){
       var W=CONFIG.WALL_THICKNESS;
       return Math.PI*(d*d/4+h*h)*W/1000;
     }
+  },
+  etc: {
+    name:"기타", labels:["가로 (X)","세로 (Y)","높이 (Z)"],
+    useY:true, solid:true,
+    volume:function(x,y,z){return x*y*z/1000;}
   }
 };
 
-/* ── 공용 유틸 (전역) ── */
 function fmt(n){return Math.round(n).toLocaleString("ko-KR");}
 function ceil(n,u){return Math.ceil(n/u)*u;}
 function formatTime(minutes){
@@ -504,13 +667,12 @@ function formatTime(minutes){
   return "약 "+h+"시간 "+m+"분";
 }
 
-/* ── 공용 계산 ── */
 function calcEffectiveFill(shapeKey,x,y,z,infPct){
   var shape=SHAPES[shapeKey];
   var lineW=CONFIG.LINE_WIDTH, wallThick=CONFIG.WALL_COUNT*lineW;
   var tbThick=CONFIG.TOP_BOTTOM_LAYERS*CONFIG.LAYER_HEIGHT;
   if(shape.solid){
-    var wf = shapeKey==="box"
+    var wf = shapeKey==="etc"
       ? Math.min(1,2*(x+y)*wallThick/(x*y))
       : Math.min(1,4*wallThick/x);
     var tf=Math.min(1,2*tbThick/z);
@@ -591,72 +753,225 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
   var contactKakao = $("#contact-kakao");
   var rtPreview   = $("#rt-preview");
 
-  var currentShape = "cylinder";
-  var selectedTier = "none";
+  var currentShape = "";
+  var selectedTier = "";
   var lastResult   = null;
   var lastExtra    = null;
 
   contactBtn.href = "mailto:"+CONFIG.CONTACT_EMAIL+"?subject=3D 프린팅 견적 문의";
 
-  /* ── Progressive Disclosure ── */
-  function chooseMode(mode){
-    var flowSection = $("#flow-section");
-    var panelSTL    = $("#panel-stl");
-    var panelManual = $("#panel-manual");
+  /* ══════════════════════════════════════════
+   *  Step Wizard Logic
+   * ══════════════════════════════════════════ */
+  var currentStep = 1;
+  var currentMode = null;
+  var TIER_LABELS = {none:"모델 보유", lite:"Lite", standard:"Standard", premium:"Premium", custom:"Custom"};
 
-    // Mark entry cards
-    $$(".entry-card").forEach(function(c){c.classList.remove("selected");});
-    if(mode==="stl"){
-      $("#btn-choose-stl").classList.add("selected");
-      panelSTL.classList.remove("hidden");
-      panelManual.classList.add("hidden");
+  var RECOMMEND_MAP = {
+    lite:     {title:"추천 등급: Lite", desc:"단순 도형 제작에 적합합니다. 박스, 원통 등 기본 형태."},
+    standard: {title:"추천 등급: Standard", desc:"곡면이 포함된 생활소품, 제품 형태 제작에 적합합니다."},
+    premium:  {title:"추천 등급: Premium", desc:"피규어, 장식품 등 복잡한 외형 제작에 적합합니다."},
+    custom:   {title:"추천 등급: Custom", desc:"정밀 결합, 분할 출력, 여러 파트가 필요한 작업입니다. 상담 후 견적이 확정됩니다."}
+  };
+
+  function goToStep(n){
+    currentStep = n;
+    $$(".step-panel").forEach(function(p){ p.classList.add("hidden"); });
+
+    if(currentMode === "stl"){
+      $("#panel-stl").classList.remove("hidden");
     } else {
-      $("#btn-choose-manual").classList.add("selected");
-      panelManual.classList.remove("hidden");
-      panelSTL.classList.add("hidden");
+      var target = $("#step-"+n);
+      if(target) target.classList.remove("hidden");
     }
 
-    flowSection.classList.remove("hidden");
-    setTimeout(function(){
-      flowSection.scrollIntoView({behavior:"smooth", block:"nearest"});
-    }, 80);
+    updateBreadcrumb();
   }
 
-  function resetToEntry(){
-    $("#flow-section").classList.add("hidden");
-    $("#result-section").classList.add("hidden");
-    $$(".entry-card").forEach(function(c){c.classList.remove("selected");});
-    lastResult = null; lastExtra = null;
-    resultCard.classList.remove("visible");
-    dimX.value = ""; dimY.value = ""; dimZ.value = "";
-    rtPreview.classList.add("hidden");
+  function updateBreadcrumb(){
+    var step3Done = currentMode === "manual" && currentStep === 3 && currentShape !== "";
+
+    $$(".step-crumb").forEach(function(crumb){
+      var step = parseInt(crumb.dataset.step);
+      crumb.classList.remove("active","completed");
+      crumb.disabled = true;
+      crumb.removeAttribute("aria-current");
+
+      if(currentMode === "stl"){
+        if(step === 1){ crumb.classList.add("completed"); crumb.disabled = false; }
+      } else {
+        if(step < currentStep){ crumb.classList.add("completed"); crumb.disabled = false; }
+        else if(step === currentStep){
+          if(step === 3 && step3Done){
+            crumb.classList.add("completed"); crumb.disabled = false;
+          } else {
+            crumb.classList.add("active");
+            crumb.setAttribute("aria-current","step");
+          }
+        }
+      }
+    });
+
+    $("#crumb-val-1").textContent = currentMode === "stl" ? "STL 업로드" : (currentMode === "manual" ? "치수 계산" : "");
+    $("#crumb-val-2").textContent = currentMode === "manual" && currentStep > 2 ? TIER_LABELS[selectedTier]||"" : "";
+    $("#crumb-val-3").textContent = currentMode === "manual" && currentStep >= 3 && currentShape ? (SHAPES[currentShape]?SHAPES[currentShape].name:"") : "";
   }
 
-  $("#btn-choose-stl").addEventListener("click", function(){chooseMode("stl");});
-  $("#btn-choose-manual").addEventListener("click", function(){chooseMode("manual");});
-  $("#back-btn-stl").addEventListener("click", resetToEntry);
-  $("#back-btn-manual").addEventListener("click", resetToEntry);
-
-  /* ── Tier selection ── */
-  $$(".tier-btn").forEach(function(btn){
-    btn.addEventListener("click", function(){
-      $$(".tier-btn").forEach(function(b){b.classList.remove("active");});
-      btn.classList.add("active");
-      selectedTier = btn.dataset.tier;
-      if(lastResult) renderResult();
+  $$(".step-crumb").forEach(function(crumb){
+    crumb.addEventListener("click", function(){
+      if(crumb.disabled) return;
+      var step = parseInt(crumb.dataset.step);
+      if(step < currentStep && currentMode === "manual"){
+        goToStep(step);
+      } else if(currentMode === "stl" && step === 1){
+        currentMode = null;
+        goToStep(1);
+      }
     });
   });
+
+  function hideSideResult(){
+    $("#side-panel").classList.remove("has-result");
+    $("#side-placeholder").style.display = "";
+    hideMobileBar();
+  }
+  function showSideResult(){
+    $("#side-panel").classList.add("has-result");
+    $("#side-placeholder").style.display = "none";
+    showMobileBar();
+  }
+
+  /* ── Mobile Bottom Bar / Sheet ── */
+  var mobileBar = $("#mobile-quote-bar");
+  var bottomSheet = $("#bottom-sheet");
+  var sheetOverlay = $("#sheet-overlay");
+
+  function showMobileBar(){
+    mobileBar.classList.add("visible");
+  }
+  function hideMobileBar(){
+    mobileBar.classList.remove("visible");
+  }
+  function openSheet(){
+    bottomSheet.classList.add("open");
+    sheetOverlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function closeSheet(){
+    bottomSheet.classList.remove("open");
+    sheetOverlay.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  $("#mobile-bar-detail").addEventListener("click", openSheet);
+  sheetOverlay.addEventListener("click", closeSheet);
+  $(".bottom-sheet-handle").addEventListener("click", closeSheet);
+
+  /* ── Details accordion ── */
+  var detailsToggle = $("#details-toggle");
+  var detailsBody = $("#details-body");
+  detailsToggle.addEventListener("click", function(){
+    var open = detailsToggle.classList.toggle("open");
+    detailsToggle.setAttribute("aria-expanded", open);
+    detailsBody.style.maxHeight = open ? "none" : "0";
+    detailsBody.style.overflow = open ? "visible" : "hidden";
+  });
+  detailsToggle.classList.add("open");
+
+  /* ── Step 1 buttons ── */
+  $("#btn-choose-stl").addEventListener("click", function(){
+    currentMode = "stl";
+    selectedTier = "none";
+    goToStep(1);
+    hideSideResult();
+  });
+
+  $("#btn-choose-manual").addEventListener("click", function(){
+    currentMode = "manual";
+    goToStep(2);
+  });
+
+  /* ── "STL 업로드로 이동" link in Step 2 ── */
+  $("#go-stl-link").addEventListener("click", function(){
+    currentMode = "stl";
+    selectedTier = "none";
+    goToStep(1);
+    hideSideResult();
+  });
+
+  /* ── Recommendation wizard ── */
+  var step2NextBtn = $("#step2-next-btn");
+
+  $$(".recommend-opt").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      $$(".recommend-opt").forEach(function(b){b.classList.remove("selected");});
+      btn.classList.add("selected");
+
+      var tier = btn.dataset.recommend;
+      var info = RECOMMEND_MAP[tier];
+      var resultEl = $("#recommend-result");
+      $("#recommend-result-title").textContent = info.title;
+      $("#recommend-result-desc").textContent = info.desc;
+      resultEl.classList.remove("hidden");
+
+      selectedTier = tier;
+      step2NextBtn.disabled = false;
+
+      if(lastResult){
+        renderResult();
+        showUpdatedBadge();
+      }
+    });
+  });
+
+  step2NextBtn.addEventListener("click", function(){
+    if(!selectedTier) return;
+    goToStep(3);
+  });
+
+  function showUpdatedBadge(){
+    var badge = $("#result-updated");
+    var card = $("#result-card");
+    badge.classList.remove("hidden");
+    card.classList.add("result-pulse");
+    setTimeout(function(){
+      badge.classList.add("hidden");
+      card.classList.remove("result-pulse");
+    }, 2000);
+  }
 
   /* ── Shape switching ── */
   $$(".shape-btn").forEach(function(btn){
     btn.addEventListener("click", function(){
-      $$(".shape-btn").forEach(function(b){b.classList.remove("active");});
+      $$(".shape-btn").forEach(function(b){b.classList.remove("active"); b.setAttribute("aria-pressed","false"); b.setAttribute("aria-checked","false");});
       btn.classList.add("active");
+      btn.setAttribute("aria-pressed","true");
+      btn.setAttribute("aria-checked","true");
       currentShape = btn.dataset.shape;
       applyShape();
+      updateBreadcrumb();
       updateRtPreview();
+      if(lastResult){
+        recalcManual();
+      }
     });
   });
+
+  function recalcManual(){
+    var shape = SHAPES[currentShape];
+    var x = parseFloat(dimX.value)||0;
+    var y = shape.useY ? (parseFloat(dimY.value)||0) : 0;
+    var z = parseFloat(dimZ.value)||0;
+    if(x>0 && z>0 && (!shape.useY || y>0)){
+      var r = window.estimateManual(currentShape, x, y, z, FIXED_INFILL);
+      if(r){
+        window.showResult(r, {emailBody:
+          "형태: "+shape.name+"\n치수: "+x+(shape.useY?"×"+y:"")+"×"+z+" mm\n"
+        });
+        showUpdatedBadge();
+      }
+    }
+  }
 
   function applyShape(){
     var shape = SHAPES[currentShape];
@@ -677,6 +992,7 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
 
   /* ── Real-time preview ── */
   function updateRtPreview(){
+    if(!currentShape) return;
     var shape = SHAPES[currentShape];
     var x = parseFloat(dimX.value)||0;
     var y = shape.useY ? (parseFloat(dimY.value)||0) : 0;
@@ -695,9 +1011,25 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
   [dimX, dimY, dimZ].forEach(function(el){
     el.addEventListener("input", function(){
       if(el.value) validateField(el, el.closest(".field").id);
+      checkDimWarning(el);
       updateRtPreview();
     });
   });
+
+  /* ── Dimension warnings ── */
+  function checkDimWarning(input){
+    var v = parseFloat(input.value);
+    var warnEl = input.closest(".field").querySelector(".warning-msg");
+    if(!warnEl) return;
+    var field = input.closest(".field");
+    if(v > CONFIG.MAX_DIM){
+      warnEl.textContent = CONFIG.MAX_DIM+"mm(24cm) 이상은 출력이 불가합니다.";
+      field.classList.add("has-warning");
+    } else {
+      warnEl.textContent = "";
+      field.classList.remove("has-warning");
+    }
+  }
 
   /* ── Validation ── */
   function clearError(fid){
@@ -736,9 +1068,9 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
         stepEl.textContent=loadingSteps[i].text; i++;
       } else {
         clearInterval(iv);
-        setTimeout(function(){ overlay.classList.add("hidden"); callback(); }, 250);
+        setTimeout(function(){ overlay.classList.add("hidden"); callback(); }, 200);
       }
-    }, 220);
+    }, 180);
   }
 
   /* ── Result rendering ── */
@@ -750,8 +1082,7 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     if(!lastResult) return;
     var r=lastResult, extra=lastExtra;
 
-    // Show result section
-    $("#result-section").classList.remove("hidden");
+    showSideResult();
 
     volInfo.textContent  = r.volCm3.toFixed(1)+" cm³";
     filInfo.textContent  = Math.round(r.filGrams)+"g";
@@ -763,23 +1094,28 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     var needsModeling= selectedTier!=="none" && selectedTier!=="custom";
     var isCustom=selectedTier==="custom";
 
+    var totalText = "";
+
     if(needsModeling){
       var tLow=mc.fee+r.low, tHigh=mc.fee+r.high;
       $("#modeling-price").textContent = fmt(mc.fee)+"원";
       $("#printing-price").textContent = fmt(r.low)+"원 ~ "+fmt(r.high)+"원";
       $("#total-price").textContent    = fmt(tLow)+"원 ~ "+fmt(tHigh)+"원";
+      totalText = fmt(tLow)+"원~"+fmt(tHigh)+"원";
       breakdown.classList.remove("hidden"); simpleDisplay.style.display="none";
       contactBtn.href = buildEmailHref(extra,mc,r,tLow,tHigh);
     } else if(isCustom){
       $("#modeling-price").textContent = "추후 협의";
       $("#printing-price").textContent = fmt(r.low)+"원 ~ "+fmt(r.high)+"원";
       $("#total-price").textContent    = "추후 협의";
+      totalText = "추후 협의";
       breakdown.classList.remove("hidden"); simpleDisplay.style.display="none";
       contactBtn.href = "mailto:"+CONFIG.CONTACT_EMAIL
         +"?subject=3D 프린팅 견적 문의 (Custom 모델링)"
         +"&body="+encodeURIComponent((extra&&extra.emailBody?extra.emailBody:"")+"\n※ Custom 모델링 요청\n");
     } else {
       priceValue.textContent = "약 "+fmt(r.low)+"원 ~ "+fmt(r.high)+"원";
+      totalText = fmt(r.low)+"원~"+fmt(r.high)+"원";
       breakdown.classList.add("hidden"); simpleDisplay.style.display="";
       if(extra&&extra.emailBody){
         contactBtn.href="mailto:"+CONFIG.CONTACT_EMAIL
@@ -788,6 +1124,18 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
       }
     }
 
+    // Update mobile bar
+    $("#mobile-bar-price").textContent = totalText;
+
+    // Update bottom sheet
+    $("#sheet-total").textContent = totalText;
+    $("#sheet-modeling").textContent = needsModeling ? fmt(mc.fee)+"원" : (isCustom ? "추후 협의" : "₩0");
+    $("#sheet-printing").textContent = fmt(r.low)+"원 ~ "+fmt(r.high)+"원";
+    $("#sheet-vol").textContent = r.volCm3.toFixed(1)+" cm³";
+    $("#sheet-fil").textContent = Math.round(r.filGrams)+"g";
+    $("#sheet-time").textContent = formatTime(r.printMin);
+    $("#sheet-email").href = contactBtn.href;
+
     var dimsGrid=$("#stl-dims-grid");
     if(extra&&extra.bbox){
       dimsGrid.style.display="";
@@ -795,14 +1143,6 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
       $("#dim-y-info").textContent=extra.bbox.y.toFixed(1)+" mm";
       $("#dim-z-info").textContent=extra.bbox.z.toFixed(1)+" mm";
     } else { dimsGrid.style.display="none"; }
-
-    resultCard.classList.remove("visible");
-    void resultCard.offsetHeight;
-    resultCard.classList.add("visible");
-
-    setTimeout(function(){
-      resultCard.scrollIntoView({behavior:"smooth",block:"nearest"});
-    }, 80);
   }
 
   function buildEmailHref(extra,mc,r,tLow,tHigh){
@@ -816,6 +1156,7 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
 
   /* ── Manual Calculate ── */
   calcBtn.addEventListener("click", function(){
+    if(!currentShape) return;
     var shape=SHAPES[currentShape];
     var vx=validateField(dimX,"field-x");
     var vy=shape.useY?validateField(dimY,"field-y"):true;
@@ -837,6 +1178,156 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
       });
     });
   });
+
+  /* ══════════════════════════════════════════
+   *  견적서 이미지 생성 & 카카오톡 핸들러
+   * ══════════════════════════════════════════ */
+
+  function showToast(msg){
+    var toast = $("#copy-toast");
+    $("#toast-msg").textContent = msg || "견적서가 저장되었습니다";
+    toast.classList.add("visible");
+    setTimeout(function(){ toast.classList.remove("visible"); }, 2500);
+  }
+
+  function fillQuoteTemplate(){
+    var mc = getModelingCost();
+    var r = lastResult;
+    if(!r) return;
+
+    var needsModeling = selectedTier!=="none" && selectedTier!=="custom";
+    var isCustom = selectedTier==="custom";
+
+    var today = new Date();
+    var dateStr = today.getFullYear()+"."+(today.getMonth()+1)+"."+today.getDate();
+    $("#qi-date").textContent = dateStr;
+
+    if(needsModeling){
+      $("#qi-modeling").textContent = fmt(mc.fee)+"원";
+      $("#qi-printing").textContent = fmt(r.low)+"원 ~ "+fmt(r.high)+"원";
+      $("#qi-total").textContent = fmt(mc.fee+r.low)+"원 ~ "+fmt(mc.fee+r.high)+"원";
+    } else if(isCustom){
+      $("#qi-modeling").textContent = "추후 협의";
+      $("#qi-printing").textContent = fmt(r.low)+"원 ~ "+fmt(r.high)+"원";
+      $("#qi-total").textContent = "추후 협의";
+    } else {
+      $("#qi-modeling").textContent = "₩0 (모델 보유)";
+      $("#qi-printing").textContent = fmt(r.low)+"원 ~ "+fmt(r.high)+"원";
+      $("#qi-total").textContent = fmt(r.low)+"원 ~ "+fmt(r.high)+"원";
+    }
+
+    var shapeName = currentShape && SHAPES[currentShape] ? SHAPES[currentShape].name : (lastExtra&&lastExtra.bbox ? "STL 파일" : "—");
+    $("#qi-shape").textContent = shapeName;
+
+    if(lastExtra && lastExtra.bbox){
+      var bb = lastExtra.bbox;
+      $("#qi-dims").textContent = bb.x.toFixed(1)+" × "+bb.y.toFixed(1)+" × "+bb.z.toFixed(1)+" mm";
+    } else if(currentShape && SHAPES[currentShape]){
+      var shape = SHAPES[currentShape];
+      var x = parseFloat(dimX.value)||0;
+      var y = shape.useY ? (parseFloat(dimY.value)||0) : 0;
+      var z = parseFloat(dimZ.value)||0;
+      if(shape.useY){
+        $("#qi-dims").textContent = x+" × "+y+" × "+z+" mm";
+      } else {
+        $("#qi-dims").textContent = "지름 "+x+" × 높이 "+z+" mm";
+      }
+    } else {
+      $("#qi-dims").textContent = "—";
+    }
+
+    $("#qi-vol").textContent = r.volCm3.toFixed(1)+" cm³";
+    $("#qi-fil").textContent = Math.round(r.filGrams)+"g";
+    $("#qi-time").textContent = formatTime(r.printMin);
+  }
+
+  function buildQuoteImage(callback){
+    if(!lastResult){ return; }
+    fillQuoteTemplate();
+
+    var tpl = document.getElementById("quote-image-tpl");
+    html2canvas(tpl, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff"
+    }).then(function(canvas){
+      canvas.toBlob(function(blob){
+        if(!blob) return;
+        callback(blob, canvas);
+      }, "image/png");
+    });
+  }
+
+  function downloadBlob(blob, filename){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filename || "견적서_어울림.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function handleKakaoClick(e){
+    e.preventDefault();
+    if(!lastResult){
+      window.open(CONFIG.KAKAO_CHANNEL+"/chat", "_blank");
+      return;
+    }
+
+    if(window.Kakao && Kakao.isInitialized()){
+      var mc = getModelingCost();
+      var needsModeling = selectedTier!=="none" && selectedTier!=="custom";
+      var isCustom = selectedTier==="custom";
+      var totalLow, totalHigh, totalText;
+
+      if(isCustom){
+        totalText = "추후 협의";
+      } else {
+        totalLow = mc.fee + lastResult.low;
+        totalHigh = mc.fee + lastResult.high;
+        totalText = fmt(totalLow)+"원 ~ "+fmt(totalHigh)+"원";
+      }
+
+      var descParts = [];
+      if(needsModeling) descParts.push("모델링: "+fmt(mc.fee)+"원");
+      descParts.push("출력: "+fmt(lastResult.low)+"~"+fmt(lastResult.high)+"원");
+      descParts.push("부피: "+lastResult.volCm3.toFixed(1)+"cm³");
+      descParts.push("필라멘트: "+Math.round(lastResult.filGrams)+"g");
+
+      Kakao.Share.sendDefault({
+        objectType: "feed",
+        content: {
+          title: "3D 프린팅 견적서 — 어울,림",
+          description: "예상 금액: "+totalText+"\n"+descParts.join(" / "),
+          imageUrl: "https://eoulrimstudio.com/og-image.png",
+          link: {
+            mobileWebUrl: window.location.href,
+            webUrl: window.location.href
+          }
+        },
+        buttons: [{
+          title: "견적서 확인하기",
+          link: {
+            mobileWebUrl: window.location.href,
+            webUrl: window.location.href
+          }
+        }]
+      });
+    } else {
+      window.open(CONFIG.KAKAO_CHANNEL+"/chat", "_blank");
+    }
+  }
+
+  // Desktop side panel kakao button
+  contactKakao.addEventListener("click", handleKakaoClick);
+
+  // Mobile bottom sheet kakao button
+  var sheetKakao = $("#sheet-kakao");
+  if(sheetKakao){
+    sheetKakao.addEventListener("click", handleKakaoClick);
+  }
 
 })();
 </script>
@@ -869,7 +1360,7 @@ let initCamPos = null;
 function initViewer(){
   if(renderer) return;
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xF2F4F8);
+  scene.background = new THREE.Color(0xF7F8FA);
 
   renderer = new THREE.WebGLRenderer({canvas, antialias:true});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
@@ -883,7 +1374,6 @@ function initViewer(){
   controls.autoRotate = true;
   controls.autoRotateSpeed = 1.5;
 
-  // Stop auto-rotate on user interaction
   controls.addEventListener("start", ()=>{ controls.autoRotate = false; });
 
   const al = new THREE.AmbientLight(0xffffff, 0.75);
@@ -906,7 +1396,7 @@ function initViewer(){
 function resizeViewer(){
   if(!renderer) return;
   const w = viewerWrap.clientWidth;
-  const h = Math.min(w*0.62, 380);
+  const h = Math.min(w*0.6, 340);
   canvas.style.width = w+"px";
   canvas.style.height = h+"px";
   renderer.setSize(w, h);
@@ -962,9 +1452,7 @@ function loadSTL(arrayBuffer, filename){
   controls.autoRotate = true;
   controls.update();
 
-  // Save initial camera state for reset
   initCamPos = camera.position.clone();
-
   resizeViewer();
 }
 
@@ -976,10 +1464,11 @@ function clearSTL(){
   viewerInfoEl.textContent = "";
   calcStlBtn.disabled = true;
   stlVolumeMm3=0; stlBbox=null; fileInput.value="";
-  document.querySelector("#result-section").classList.add("hidden");
+  document.querySelector("#side-panel").classList.remove("has-result");
+  document.querySelector("#side-placeholder").style.display="";
+  document.querySelector("#mobile-quote-bar").classList.remove("visible");
 }
 
-// Reset view button
 resetBtn.addEventListener("click", ()=>{
   if(!initCamPos || !controls) return;
   camera.position.copy(initCamPos);
@@ -989,8 +1478,8 @@ resetBtn.addEventListener("click", ()=>{
   controls.update();
 });
 
-// Drag & drop
 dropzone.addEventListener("click", ()=>fileInput.click());
+dropzone.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" ") fileInput.click(); });
 dropzone.addEventListener("dragover", e=>{ e.preventDefault(); dropzone.classList.add("dragover"); });
 dropzone.addEventListener("dragleave", ()=>dropzone.classList.remove("dragover"));
 dropzone.addEventListener("drop", e=>{
@@ -1007,7 +1496,6 @@ function handleFile(file){
   reader.readAsArrayBuffer(file);
 }
 
-// STL calculate
 calcStlBtn.addEventListener("click", ()=>{
   if(!stlVolumeMm3||!stlBbox) return;
   const overlay=document.querySelector("#loading-overlay");
@@ -1040,9 +1528,9 @@ calcStlBtn.addEventListener("click", ()=>{
             "- 필라멘트: "+Math.round(r.filGrams)+"g\n"+
             "- 예상 견적: "+Math.round(r.low).toLocaleString("ko-KR")+"원 ~ "+Math.round(r.high).toLocaleString("ko-KR")+"원\n\n상세 상담 부탁드립니다."
         });
-      }, 250);
+      }, 200);
     }
-  }, 220);
+  }, 180);
 });
 </script>
 </body>
