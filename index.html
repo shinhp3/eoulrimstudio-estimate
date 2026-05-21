@@ -9,7 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js"></script>
+<script>
+(function(){var w=window;if(w.ChannelIO){return;}var ch=function(){ch.c(arguments);};ch.q=[];ch.c=function(args){ch.q.push(args);};w.ChannelIO=ch;function l(){if(w.ChannelIOInitialized){return;}w.ChannelIOInitialized=true;var s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";s.charset="UTF-8";var x=document.getElementsByTagName("script")[0];x.parentNode.insertBefore(s,x);}if(document.readyState==="complete"){l();}else{w.addEventListener("DOMContentLoaded",l);w.addEventListener("load",l);}})();
+</script>
 <script type="importmap">
 {
   "imports": {
@@ -21,18 +23,25 @@
 </head>
 <body>
 
-<!-- ── Navbar ── -->
-<nav class="navbar" role="banner">
-  <a class="navbar-brand" href="#">
-    <div class="navbar-logo-mark">
-      <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M10 2L3 6v8l7 4 7-4V6L10 2z"/><path d="M10 2v12M3 6l7 4 7-4"/>
-      </svg>
+<!-- ── Site Header (회사 홈페이지와 동일) ── -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo-wrap">
+      <a class="logo-link" href="https://eoulrimstudio.com/" aria-label="어울림 홈">
+        <img src="assets/logo.png" alt="어울림" width="160" height="44" />
+      </a>
     </div>
-    <span class="navbar-name">어울,림 <span>Eoulrimstudio</span></span>
-  </a>
-  <span class="navbar-pill">견적 계산기</span>
-</nav>
+    <nav class="header-nav" aria-label="주요 메뉴">
+      <ul class="header-nav-list">
+        <li><a href="https://eoulrimstudio.com/">회사소개</a></li>
+        <li><a href="https://eoulrimstudio.com/board/%EB%AA%B0%EB%93%9C-%EC%A0%9C%EC%9E%91-%EC%95%88%EB%82%B4/5/">몰드제작 안내</a></li>
+        <li><a href="https://eoulrimstudio.com/category/%EC%84%9D%EA%B3%A0/23/">스토어</a></li>
+        <li><a href="https://eoulrimstudio.com/board/1:1-%EB%A7%9E%EC%B6%A4%EC%83%81%EB%8B%B4/9/">문의하기</a></li>
+        <li><a href="#" aria-current="page">3D출력 견적</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
 
 <div class="wrapper">
 
@@ -53,7 +62,7 @@
       </span>
       <span class="hero-trust-item">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        카카오 상담
+        채널톡 상담
       </span>
       <span class="hero-trust-item">
         <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4a2 2 0 0 1 2 2v7l-3-2h-3"/></svg>
@@ -69,7 +78,6 @@
 
   <div class="flow-section" id="flow-section">
 
-    <!-- 브레드크럼 -->
     <nav class="step-breadcrumb" id="step-breadcrumb" aria-label="견적 진행 단계">
       <button class="step-crumb active" data-step="1" type="button" aria-current="step">
         <span class="step-crumb-top"><span class="step-crumb-num">1</span><span class="step-crumb-title">입력 방식</span></span>
@@ -86,6 +94,11 @@
         <span class="step-crumb-value" id="crumb-val-3"></span>
       </button>
     </nav>
+
+    <div class="step-nav hidden" id="step-nav" aria-label="단계 이동">
+      <button class="step-nav-btn step-nav-back" id="step-nav-back" type="button" aria-label="이전 단계">이전</button>
+      <button class="step-nav-btn step-nav-next" id="step-nav-next" type="button">다음</button>
+    </div>
 
     <!-- ═══ Step 1: 입력 방식 선택 ═══ -->
     <div class="step-panel" id="step-1">
@@ -123,8 +136,12 @@
     <!-- ═══ Step 2: 모델링 선택 ═══ -->
     <div class="step-panel hidden" id="step-2">
       <div class="card">
-        <div class="section-title">모델링 서비스를 선택하세요</div>
-        <div class="section-subtitle">만들고 싶은 형태의 복잡도에 따라 등급을 선택해주세요.</div>
+        <div class="card-head" id="card-head-step-2">
+          <div class="card-head-titles">
+            <div class="section-title">모델링 서비스를 선택하세요</div>
+            <div class="section-subtitle">만들고 싶은 형태의 복잡도에 따라 등급을 선택해주세요.</div>
+          </div>
+        </div>
 
         <div class="modeling-intro" id="go-stl-card">
           <div class="go-stl-inner">
@@ -166,14 +183,18 @@
           </div>
         </div>
 
-        <button class="btn btn-primary" id="step2-next-btn" type="button" disabled>다음</button>
       </div>
     </div>
 
     <!-- ═══ Step 3: 형태 + 치수 ═══ -->
     <div class="step-panel hidden" id="step-3">
       <div class="card">
-        <div class="section-title">형태 선택</div>
+        <div class="card-head" id="card-head-step-3">
+          <div class="card-head-titles">
+            <div class="section-title">형태 · 치수 입력</div>
+          </div>
+        </div>
+        <div class="section-title section-title-sub">형태 선택</div>
         <div class="shape-grid" id="shape-grid" role="radiogroup" aria-label="출력 형태 선택">
           <button class="shape-btn" data-shape="cup" type="button" role="radio" aria-checked="false" aria-pressed="false">
             <svg viewBox="0 0 24 24"><path d="M5 3h14v13c0 2.2-2.7 4-7 4s-7-1.8-7-4V3z"/><path d="M19 7h1.5a2.5 2.5 0 0 1 0 5H19"/></svg>
@@ -195,7 +216,7 @@
 
         <hr class="divider">
 
-        <div class="section-title">치수 입력</div>
+        <div class="section-title section-title-sub">치수 입력</div>
         <div class="dim-grid two-fields" id="dim-grid">
           <div class="field" id="field-x">
             <label for="dim-x" id="label-x">지름 (D)</label>
@@ -226,13 +247,17 @@
           <div class="rt-item"><span class="rt-label">출력 시간</span><span class="rt-value" id="rt-time">—</span></div>
         </div>
 
-        <button class="btn btn-primary" id="calc-btn" type="button">견적 계산하기</button>
       </div>
     </div>
 
     <!-- ═══ STL 패널 ═══ -->
     <div class="step-panel hidden" id="panel-stl">
       <div class="card">
+        <div class="card-head" id="card-head-stl">
+          <div class="card-head-titles">
+            <div class="section-title">STL 파일 업로드</div>
+          </div>
+        </div>
         <div class="stl-dropzone" id="stl-dropzone" role="button" tabindex="0" aria-label="STL 파일 업로드 영역">
           <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -262,31 +287,38 @@
             <button class="viewer-reset-btn" id="viewer-reset-btn" type="button" aria-label="뷰 초기화">↺ 초기화</button>
           </div>
         </div>
-        <button class="btn btn-primary" id="calc-stl-btn" type="button" disabled>견적 계산하기</button>
       </div>
     </div>
 
   </div><!-- /flow-section -->
 
   <!-- ══════════════════════════════════════════
-       사이드 패널 (Desktop)
+       예상 견적 (견적 방식 선택 아래)
   ══════════════════════════════════════════ -->
   <aside class="side-panel" id="side-panel" aria-label="견적 요약">
     <div class="order-summary" id="result-card">
 
-      <div class="order-summary-header">
-        <div class="order-summary-title">예상 견적</div>
-        <div class="order-summary-meta">PLA · 5% infill · 참고 견적</div>
+      <div class="order-summary-top">
+        <div class="order-summary-header">
+          <div class="order-summary-title">예상 견적</div>
+          <div class="order-summary-meta">PLA · 5% infill · 참고 견적</div>
+        </div>
+        <div class="order-step-badge">Step 4 · 견적 확인</div>
+        <div class="result-updated hidden" id="result-updated">견적이 업데이트되었습니다</div>
       </div>
-      <div class="order-step-badge">Step 4 · 견적 확인</div>
-      <div class="result-updated hidden" id="result-updated">견적이 업데이트되었습니다</div>
 
       <div class="side-placeholder" id="side-placeholder">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 7h6M9 11h6M9 15h4"/>
           <rect x="4" y="3" width="16" height="18" rx="2"/>
         </svg>
-        <p>치수를 입력하거나 STL 파일을<br>업로드하면 견적이 여기에 표시됩니다</p>
+        <p>치수를 입력하거나 STL 파일을 업로드하면 견적이 여기에 표시됩니다</p>
+      </div>
+
+      <div class="estimate-panel-body">
+      <div class="order-selection" id="order-selection">
+        <div class="order-selection-title">선택 옵션</div>
+        <div class="order-selection-list" id="selection-summary-list"></div>
       </div>
 
       <!-- 가격 내역 -->
@@ -346,21 +378,16 @@
 
       <!-- CTA -->
       <div class="order-cta">
-        <a class="order-btn order-btn-kakao" id="contact-kakao" href="http://pf.kakao.com/_ACNxon/chat" target="_blank" rel="noopener" aria-label="카카오톡으로 문의하기">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
-            <path d="M9 1.5C4.86 1.5 1.5 4.14 1.5 7.41c0 2.07 1.26 3.9 3.18 4.98L3.9 15.3c-.09.27.18.51.42.36l3.57-2.37c.36.03.72.06 1.11.06 4.14 0 7.5-2.64 7.5-5.91S13.14 1.5 9 1.5z"/>
+        <a class="order-btn order-btn-channel" id="contact-inquiry" href="#" aria-label="견적 문의하기">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
-          카카오톡 문의하기
-        </a>
-        <a class="order-btn order-btn-email" id="contact-btn" href="#" aria-label="카카오톡 견적 문의">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
-            <path d="M9 1.5C4.86 1.5 1.5 4.14 1.5 7.41c0 2.07 1.26 3.9 3.18 4.98L3.9 15.3c-.09.27.18.51.42.36l3.57-2.37c.36.03.72.06 1.11.06 4.14 0 7.5-2.64 7.5-5.91S13.14 1.5 9 1.5z"/>
-          </svg>
-          카카오톡 견적 문의
+          견적 문의하기
         </a>
       </div>
+      </div><!-- /estimate-panel-body -->
 
-      <p class="order-notice">형상 복잡도, 서포트 구조, 후가공 여부에 따라 실제 금액은 달라질 수 있습니다. 카카오톡으로 파일 확인 후 최종 견적이 확정됩니다.</p>
+      <p class="order-notice">형상 복잡도, 서포트 구조, 후가공 여부에 따라 실제 금액은 달라질 수 있습니다. 채널톡으로 파일 확인 후 최종 견적이 확정됩니다.</p>
     </div>
   </aside>
 
@@ -433,7 +460,7 @@
         </div>
         <div>
           <div class="trust-label">상담</div>
-          <div class="trust-value">카카오톡 파일 확인 후 최종 확정</div>
+          <div class="trust-value">채널톡 파일 확인 후 최종 확정</div>
         </div>
       </div>
     </div>
@@ -484,6 +511,10 @@
     <div class="bottom-sheet-total-label">총 예상 금액</div>
     <div class="bottom-sheet-total-value" id="sheet-total">—</div>
   </div>
+  <div class="order-selection order-selection--sheet">
+    <div class="order-selection-title">선택 옵션</div>
+    <div class="order-selection-list" id="sheet-selection-list"></div>
+  </div>
   <div class="bottom-sheet-lines" id="sheet-lines">
     <div class="bottom-sheet-line"><span class="bottom-sheet-line-label">모델링 비용</span><span class="bottom-sheet-line-value" id="sheet-modeling">—</span></div>
     <div class="bottom-sheet-line"><span class="bottom-sheet-line-label">출력 비용</span><span class="bottom-sheet-line-value" id="sheet-printing">—</span></div>
@@ -492,13 +523,12 @@
     <div class="bottom-sheet-line"><span class="bottom-sheet-line-label">출력 시간</span><span class="bottom-sheet-line-value" id="sheet-time">—</span></div>
   </div>
   <div class="bottom-sheet-cta">
-    <a class="order-btn order-btn-kakao" id="sheet-kakao" href="http://pf.kakao.com/_ACNxon/chat" target="_blank" rel="noopener">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
-        <path d="M9 1.5C4.86 1.5 1.5 4.14 1.5 7.41c0 2.07 1.26 3.9 3.18 4.98L3.9 15.3c-.09.27.18.51.42.36l3.57-2.37c.36.03.72.06 1.11.06 4.14 0 7.5-2.64 7.5-5.91S13.14 1.5 9 1.5z"/>
+    <a class="order-btn order-btn-channel" id="sheet-inquiry" href="#" aria-label="견적 문의하기">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
       </svg>
-      카카오톡 문의하기
+      견적 문의하기
     </a>
-    <a class="order-btn order-btn-email" id="sheet-email" href="#">카카오톡 견적 문의</a>
   </div>
   <p class="bottom-sheet-notice">형상 복잡도, 서포트 구조에 따라 실제 금액은 달라질 수 있습니다.</p>
 </div>
@@ -578,22 +608,23 @@
     <!-- 안내 -->
     <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:12px 14px;margin-bottom:24px;">
       <div style="font-size:11px;color:#92400E;line-height:1.5;">
-        ※ 본 견적은 참고용이며, 형상 복잡도·서포트 구조·후가공 여부에 따라 실제 금액은 달라질 수 있습니다. 카카오톡으로 파일을 보내주시면 최종 견적을 확정해드립니다.
+        ※ 본 견적은 참고용이며, 형상 복잡도·서포트 구조·후가공 여부에 따라 실제 금액은 달라질 수 있습니다. 채널톡으로 파일을 보내주시면 최종 견적을 확정해드립니다.
       </div>
     </div>
 
     <!-- 푸터 -->
     <div style="display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid #E2E8F0;">
       <div style="font-size:11px;color:#94A3B8;">PLA · 5% infill · 레이어 0.2mm</div>
-      <div style="font-size:11px;color:#94A3B8;">카카오톡: @eoulrim</div>
+      <div style="font-size:11px;color:#94A3B8;">상담: 채널톡 (우측 하단)</div>
     </div>
   </div>
 </div>
 
-<!-- 토스트 알림 -->
-<div class="toast" id="copy-toast">
-  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-  <span id="toast-msg">견적서가 저장되었습니다</span>
+<!-- 하단 안내 토스트 -->
+<div class="toast" id="app-toast" role="status" aria-live="polite" aria-atomic="true">
+  <svg class="toast-icon toast-icon--success" id="toast-icon-success" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+  <svg class="toast-icon toast-icon--guide hidden" id="toast-icon-guide" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+  <span id="toast-msg"></span>
 </div>
 
 <!-- ════════════════════════════════════════
@@ -602,7 +633,8 @@
 <script>
 var CONFIG = {
   CONTACT_EMAIL:   "eoulrimstudio@gmail.com",
-  KAKAO_CHANNEL:   "http://pf.kakao.com/_ACNxon",
+  /* channel.io → 설정 → 채널 → 채널 설치 → 웹에서 발급되는 Plugin Key */
+  CHANNEL_TALK_PLUGIN_KEY: "6ca8205b-492b-4f44-97fd-f8fa35026101",
   FILAMENT_RATE:   40,
   MACHINE_RATE:    3000,
   MIN_PRICE:       10000,
@@ -624,12 +656,13 @@ var CONFIG = {
     premium:  { fee: 150000, label: "Premium (복잡·장식)" },
     custom:   { fee: 0,      label: "Custom (추후 협의)" },
   },
-  KAKAO_JS_KEY: "196a4bfaf916e7fa6a82ee188403639f"
 };
 
-if(window.Kakao && !Kakao.isInitialized()){
-  Kakao.init(CONFIG.KAKAO_JS_KEY);
-}
+(function bootChannelTalk(){
+  var key = CONFIG.CHANNEL_TALK_PLUGIN_KEY;
+  if(!key || key === "YOUR_CHANNEL_TALK_PLUGIN_KEY"){ return; }
+  ChannelIO("boot", { pluginKey: key });
+})();
 
 var SHAPES = {
   cup: {
@@ -746,14 +779,15 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
   var labelZ      = $("#label-z");
   var fieldY      = $("#field-y");
   var dimGrid     = $("#dim-grid");
-  var calcBtn     = $("#calc-btn");
+  var stepNav       = $("#step-nav");
+  var stepNavBack   = $("#step-nav-back");
+  var stepNavNext   = $("#step-nav-next");
   var resultCard  = $("#result-card");
   var priceValue  = $("#price-value");
   var volInfo     = $("#vol-info");
   var filInfo     = $("#fil-info");
   var timeInfo    = $("#time-info");
-  var contactBtn  = $("#contact-btn");
-  var contactKakao = $("#contact-kakao");
+  var contactInquiry = $("#contact-inquiry");
   var rtPreview   = $("#rt-preview");
 
   var currentShape = "";
@@ -761,15 +795,119 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
   var lastResult   = null;
   var lastExtra    = null;
 
-  function openKakaoChat(){
-    if(window.Kakao && Kakao.isInitialized()){
-      Kakao.Channel.chat({ channelPublicId: "_ACNxon" });
+  function buildSelectionItems(){
+    var items = [];
+
+    items.push({
+      label: "입력 방식",
+      value: currentMode === "stl" ? "STL 파일 업로드" : "치수로 계산"
+    });
+
+    if(currentMode === "stl"){
+      if(lastExtra && lastExtra.fileName){
+        items.push({ label: "파일", value: lastExtra.fileName });
+      }
+      items.push({ label: "모델링", value: CONFIG.MODELING.none.label });
+      items.push({ label: "형태", value: "STL 파일" });
+      if(lastExtra && lastExtra.bbox){
+        var bb = lastExtra.bbox;
+        items.push({
+          label: "크기",
+          value: bb.x.toFixed(1)+" × "+bb.y.toFixed(1)+" × "+bb.z.toFixed(1)+" mm"
+        });
+      }
     } else {
-      window.open(CONFIG.KAKAO_CHANNEL+"/chat", "_blank");
+      if(selectedTier && CONFIG.MODELING[selectedTier]){
+        items.push({ label: "모델링", value: CONFIG.MODELING[selectedTier].label });
+      }
+      if(currentShape && SHAPES[currentShape]){
+        var shape = SHAPES[currentShape];
+        items.push({ label: "형태", value: shape.name });
+        var x = parseFloat(dimX.value) || 0;
+        var y = shape.useY ? (parseFloat(dimY.value) || 0) : 0;
+        var z = parseFloat(dimZ.value) || 0;
+        if(x > 0 && z > 0){
+          items.push({
+            label: "치수",
+            value: shape.useY
+              ? (x+" × "+y+" × "+z+" mm")
+              : ("지름 "+x+" × 높이 "+z+" mm")
+          });
+        }
+      }
     }
+
+    items.push({ label: "소재·채움", value: "PLA · "+FIXED_INFILL+"% infill" });
+    return items;
   }
-  contactBtn.href = "#";
-  contactBtn.addEventListener("click", function(e){ e.preventDefault(); openKakaoChat(); });
+
+  function renderSelectionSummary(){
+    var list = $("#selection-summary-list");
+    var sheetList = $("#sheet-selection-list");
+    if(!list) return;
+
+    var html = buildSelectionItems().map(function(item){
+      return '<div class="order-selection-row"><span>'+item.label+'</span><span>'+item.value+'</span></div>';
+    }).join("");
+
+    list.innerHTML = html;
+    if(sheetList) sheetList.innerHTML = html;
+  }
+
+  function buildQuoteInquiryText(){
+    if(!lastResult){ return ""; }
+    var mc = getModelingCost();
+    var r = lastResult;
+    var needsModeling = selectedTier!=="none" && selectedTier!=="custom";
+    var isCustom = selectedTier==="custom";
+    var lines = ["안녕하세요, 3D 프린팅 견적 문의드립니다.", ""];
+
+    buildSelectionItems().forEach(function(item){
+      lines.push("- "+item.label+": "+item.value);
+    });
+
+    lines.push("- 추정 부피: "+r.volCm3.toFixed(1)+" cm³");
+    lines.push("- 필라멘트: "+Math.round(r.filGrams)+"g");
+    lines.push("- 예상 출력 시간: "+formatTime(r.printMin));
+
+    if(needsModeling){ lines.push("- 모델링 비용: "+fmt(mc.fee)+"원"); }
+    else if(isCustom){ lines.push("- 모델링 비용: 추후 협의"); }
+
+    lines.push("- 출력 비용: "+fmt(r.low)+"원 ~ "+fmt(r.high)+"원");
+
+    if(isCustom){
+      lines.push("- 예상 총액: 추후 협의");
+    } else {
+      lines.push("- 예상 총액: "+fmt(mc.fee+r.low)+"원 ~ "+fmt(mc.fee+r.high)+"원");
+    }
+
+    lines.push("", "상세 상담 부탁드립니다.");
+    return lines.join("\n");
+  }
+
+  function openQuoteInquiry(e){
+    if(e){ e.preventDefault(); }
+    if(!lastResult){
+      alert("먼저 견적을 계산해 주세요.");
+      return;
+    }
+    if(!window.ChannelIO){
+      alert("채널톡이 아직 준비되지 않았습니다.");
+      return;
+    }
+    var message = buildQuoteInquiryText();
+    ChannelIO("openChat", undefined, message);
+  }
+
+  if(contactInquiry){
+    contactInquiry.href = "#";
+    contactInquiry.addEventListener("click", openQuoteInquiry);
+  }
+  var sheetInquiry = $("#sheet-inquiry");
+  if(sheetInquiry){
+    sheetInquiry.href = "#";
+    sheetInquiry.addEventListener("click", openQuoteInquiry);
+  }
 
   /* ══════════════════════════════════════════
    *  Step Wizard Logic
@@ -785,6 +923,61 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     custom:   {title:"추천 등급: Custom", desc:"정밀 결합, 분할 출력, 여러 파트가 필요한 작업입니다. 상담 후 견적이 확정됩니다."}
   };
 
+  var toastHideTimer = null;
+
+  function showGuideToast(msg){
+    var toast = $("#app-toast");
+    var mobileBar = $("#mobile-quote-bar");
+    if(!toast) return;
+    if(toastHideTimer){ clearTimeout(toastHideTimer); toastHideTimer = null; }
+    $("#toast-msg").textContent = msg;
+    toast.classList.remove("toast--success");
+    toast.classList.add("toast--guide");
+    $("#toast-icon-success").classList.add("hidden");
+    $("#toast-icon-guide").classList.remove("hidden");
+    toast.style.bottom = (mobileBar && mobileBar.classList.contains("visible")) ? "88px" : "";
+    toast.classList.remove("visible");
+    void toast.offsetWidth;
+    toast.classList.add("visible");
+    toastHideTimer = setTimeout(function(){
+      toast.classList.remove("visible");
+      toastHideTimer = null;
+    }, 2800);
+  }
+  window.showGuideToast = showGuideToast;
+
+  function showSuccessToast(msg){
+    var toast = $("#app-toast");
+    if(!toast) return;
+    if(toastHideTimer){ clearTimeout(toastHideTimer); toastHideTimer = null; }
+    $("#toast-msg").textContent = msg || "완료되었습니다";
+    toast.classList.remove("toast--guide");
+    toast.classList.add("toast--success");
+    $("#toast-icon-guide").classList.add("hidden");
+    $("#toast-icon-success").classList.remove("hidden");
+    toast.style.bottom = "";
+    toast.classList.add("visible");
+    toastHideTimer = setTimeout(function(){
+      toast.classList.remove("visible");
+      toastHideTimer = null;
+    }, 2500);
+  }
+
+  function goBackStep(){
+    if(currentMode === "stl"){
+      currentMode = null;
+      goToStep(1);
+      return;
+    }
+    if(currentMode === "manual"){
+      if(currentStep === 3){ goToStep(2); }
+      else if(currentStep === 2){
+        currentMode = null;
+        goToStep(1);
+      }
+    }
+  }
+
   function goToStep(n){
     currentStep = n;
     $$(".step-panel").forEach(function(p){ p.classList.add("hidden"); });
@@ -797,6 +990,30 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     }
 
     updateBreadcrumb();
+    updateStepNav();
+  }
+
+  function getActiveCardHead(){
+    if(currentMode === "stl") return $("#card-head-stl");
+    if(currentMode === "manual" && currentStep === 2) return $("#card-head-step-2");
+    if(currentMode === "manual" && currentStep === 3) return $("#card-head-step-3");
+    return null;
+  }
+
+  function updateStepNav(){
+    if(!stepNav) return;
+    var showNav = (currentMode === "manual" && currentStep >= 2) || currentMode === "stl";
+    stepNav.classList.toggle("hidden", !showNav);
+    if(showNav){
+      var head = getActiveCardHead();
+      if(head && stepNav.parentElement !== head){ head.appendChild(stepNav); }
+    }
+    if(!showNav || !stepNavNext) return;
+    if(currentMode === "stl" || currentStep === 3){
+      stepNavNext.textContent = "견적 계산";
+    } else {
+      stepNavNext.textContent = "다음";
+    }
   }
 
   function updateBreadcrumb(){
@@ -846,6 +1063,122 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     $("#side-placeholder").style.display = "";
     hideMobileBar();
   }
+  var scrollAnimFrame = null;
+  var lockedScrollY = null;
+
+  function getScrollY(){
+    if(lockedScrollY !== null) return lockedScrollY;
+    return window.pageYOffset
+      || document.documentElement.scrollTop
+      || document.body.scrollTop
+      || 0;
+  }
+
+  function setScrollY(y){
+    var top = Math.max(0, Math.round(y));
+    window.scrollTo(0, top);
+    document.documentElement.scrollTop = top;
+    document.body.scrollTop = top;
+  }
+
+  function lockPageScroll(){
+    lockedScrollY = window.pageYOffset
+      || document.documentElement.scrollTop
+      || document.body.scrollTop
+      || 0;
+    document.body.classList.add("scroll-locked");
+    document.body.style.top = (-lockedScrollY) + "px";
+    return lockedScrollY;
+  }
+
+  function unlockPageScroll(){
+    var y = lockedScrollY !== null ? lockedScrollY : getScrollY();
+    document.body.classList.remove("scroll-locked");
+    document.body.style.top = "";
+    lockedScrollY = null;
+    setScrollY(y);
+    return y;
+  }
+
+  function smoothScrollTo(targetY, duration){
+    var startY = getScrollY();
+    var distance = targetY - startY;
+    if(Math.abs(distance) < 1) return;
+
+    if(scrollAnimFrame){ cancelAnimationFrame(scrollAnimFrame); scrollAnimFrame = null; }
+
+    duration = duration || 900;
+    var startTime = performance.now();
+    function easeInOutCubic(t){
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+    setScrollY(startY);
+    function step(now){
+      var elapsed = now - startTime;
+      var p = Math.min(elapsed / duration, 1);
+      setScrollY(startY + distance * easeInOutCubic(p));
+      if(p < 1){ scrollAnimFrame = requestAnimationFrame(step); }
+      else { scrollAnimFrame = null; setScrollY(targetY); }
+    }
+    scrollAnimFrame = requestAnimationFrame(step);
+  }
+
+  function getElementPageTop(el){
+    var top = 0;
+    while(el){
+      top += el.offsetTop || 0;
+      el = el.offsetParent;
+    }
+    return top;
+  }
+
+  function getEstimateScrollTargetY(){
+    var isMobile = window.matchMedia("(max-width: 640px)").matches;
+    var target = $("#side-panel");
+    if(!target) return 0;
+    var offset = 160;
+
+    if(isMobile){
+      var layout = $("#main-layout");
+      if(layout){
+        return Math.max(0, getElementPageTop(layout) + layout.offsetHeight - window.innerHeight * 0.58);
+      }
+    }
+    return Math.max(0, getElementPageTop(target) - offset);
+  }
+
+  function runEstimateScrollAnimation(fromY){
+    var startY = typeof fromY === "number" ? fromY : getScrollY();
+    requestAnimationFrame(function(){
+      var targetY = getEstimateScrollTargetY();
+      if(Math.abs(targetY - startY) < 1) return;
+      setScrollY(startY);
+      requestAnimationFrame(function(){
+        smoothScrollTo(targetY, 900);
+      });
+    });
+  }
+
+  function finishEstimateLoading(callback, scrollAfter){
+    var overlay = $("#loading-overlay");
+    setTimeout(function(){
+      if(!scrollAfter){
+        overlay.classList.add("hidden");
+        if(callback) callback();
+        return;
+      }
+
+      /* 견적 영역이 펼쳐질 때 Chrome이 스크롤을 먼저 밀어 올리는 것 방지 */
+      var scrollYBefore = lockPageScroll();
+      overlay.classList.add("hidden");
+      if(callback) callback();
+      unlockPageScroll();
+      void document.documentElement.offsetHeight;
+      runEstimateScrollAnimation(scrollYBefore);
+    }, 300);
+  }
+  window.finishEstimateLoading = finishEstimateLoading;
+
   function showSideResult(){
     $("#side-panel").classList.add("has-result");
     $("#side-placeholder").style.display = "none";
@@ -911,8 +1244,6 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
   });
 
   /* ── Recommendation wizard ── */
-  var step2NextBtn = $("#step2-next-btn");
-
   $$(".recommend-opt").forEach(function(btn){
     btn.addEventListener("click", function(){
       $$(".recommend-opt").forEach(function(b){b.classList.remove("selected");});
@@ -926,7 +1257,6 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
       resultEl.classList.remove("hidden");
 
       selectedTier = tier;
-      step2NextBtn.disabled = false;
 
       if(lastResult){
         renderResult();
@@ -935,10 +1265,57 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     });
   });
 
-  step2NextBtn.addEventListener("click", function(){
-    if(!selectedTier) return;
+  function handleStep2Next(){
+    if(!selectedTier){
+      showGuideToast("모델링 등급을 선택해 주세요.");
+      return;
+    }
     goToStep(3);
-  });
+  }
+
+  function handleManualCalc(){
+    if(!currentShape){
+      showGuideToast("출력 형태를 선택해 주세요.");
+      return;
+    }
+    var shape=SHAPES[currentShape];
+    var vx=validateField(dimX,"field-x");
+    var vy=shape.useY?validateField(dimY,"field-y"):true;
+    var vz=validateField(dimZ,"field-z");
+    if(!vx||!vy||!vz){
+      showGuideToast("치수를 올바르게 입력해 주세요.");
+      return;
+    }
+    var x=parseFloat(dimX.value), y=shape.useY?parseFloat(dimY.value):0, z=parseFloat(dimZ.value);
+    showLoading(function(){
+      var r=window.estimateManual(currentShape,x,y,z,FIXED_INFILL);
+      var sizeText=shape.useY?(x+" × "+y+" × "+z+" mm"):("지름 "+x+" × 높이 "+z+" mm");
+      window.showResult(r,{
+        emailBody:"안녕하세요, 3D 프린팅 견적 문의드립니다.\n\n"+
+          "- 형태: "+shape.name+"\n"+
+          "- 크기: "+sizeText+"\n"+
+          "- 채움율: "+FIXED_INFILL+"%\n"+
+          "- 추정 부피: "+r.volCm3.toFixed(1)+" cm³\n"+
+          "- 필라멘트: "+Math.round(r.filGrams)+"g\n"+
+          "- 예상 출력 시간: "+formatTime(r.printMin)+"\n"+
+          "- 예상 견적: "+fmt(r.low)+"원 ~ "+fmt(r.high)+"원\n\n상세 상담 부탁드립니다."
+      });
+    }, { scrollAfter: true });
+  }
+
+  if(stepNavBack){ stepNavBack.addEventListener("click", goBackStep); }
+  if(stepNavNext){
+    stepNavNext.addEventListener("click", function(){
+      if(currentMode === "stl"){
+        if(window.runStlEstimate){ window.runStlEstimate(); }
+        return;
+      }
+      if(currentStep === 2){ handleStep2Next(); }
+      else if(currentStep === 3){ handleManualCalc(); }
+    });
+  }
+
+  updateStepNav();
 
   function showUpdatedBadge(){
     var badge = $("#result-updated");
@@ -1065,7 +1442,8 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     {text:"견적 산출 중",pct:92},
     {text:"완료!",pct:100}
   ];
-  function showLoading(callback){
+  function showLoading(callback, options){
+    options = options || {};
     var overlay=$("#loading-overlay"), bar=$("#loading-bar-fill");
     var stepEl=$("#loading-step"), textEl=$("#loading-text");
     overlay.classList.remove("hidden");
@@ -1079,7 +1457,7 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
         stepEl.textContent=loadingSteps[i].text; i++;
       } else {
         clearInterval(iv);
-        setTimeout(function(){ overlay.classList.add("hidden"); callback(); }, 200);
+        finishEstimateLoading(callback, options.scrollAfter);
       }
     }, 180);
   }
@@ -1087,13 +1465,18 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
   /* ── Result rendering ── */
   function getModelingCost(){ return CONFIG.MODELING[selectedTier]||CONFIG.MODELING.none; }
 
-  window.showResult = function(r,extra){ lastResult=r; lastExtra=extra; renderResult(); };
+  window.showResult = function(r, extra){
+    lastResult = r;
+    lastExtra = extra || {};
+    renderResult();
+  };
 
   function renderResult(){
     if(!lastResult) return;
     var r=lastResult, extra=lastExtra;
 
     showSideResult();
+    renderSelectionSummary();
 
     volInfo.textContent  = r.volCm3.toFixed(1)+" cm³";
     filInfo.textContent  = Math.round(r.filGrams)+"g";
@@ -1136,58 +1519,15 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     $("#sheet-vol").textContent = r.volCm3.toFixed(1)+" cm³";
     $("#sheet-fil").textContent = Math.round(r.filGrams)+"g";
     $("#sheet-time").textContent = formatTime(r.printMin);
-    var sheetEmailBtn = $("#sheet-email");
-    sheetEmailBtn.href = "#";
-    sheetEmailBtn.onclick = function(e){ e.preventDefault(); openKakaoChat(); };
-
-    var dimsGrid=$("#stl-dims-grid");
-    if(extra&&extra.bbox){
-      dimsGrid.style.display="";
-      $("#dim-x-info").textContent=extra.bbox.x.toFixed(1)+" mm";
-      $("#dim-y-info").textContent=extra.bbox.y.toFixed(1)+" mm";
-      $("#dim-z-info").textContent=extra.bbox.z.toFixed(1)+" mm";
-    } else { dimsGrid.style.display="none"; }
-
-    var tierLabel = selectedTier ? (CONFIG.MODELING[selectedTier]||{}).label||selectedTier : "-";
-    var shapeName = currentShape && SHAPES[currentShape] ? SHAPES[currentShape].name : (extra&&extra.bbox ? "STL 파일" : "-");
+    $("#stl-dims-grid").style.display = "none";
 
   }
-
-  /* ── Manual Calculate ── */
-  calcBtn.addEventListener("click", function(){
-    if(!currentShape) return;
-    var shape=SHAPES[currentShape];
-    var vx=validateField(dimX,"field-x");
-    var vy=shape.useY?validateField(dimY,"field-y"):true;
-    var vz=validateField(dimZ,"field-z");
-    if(!vx||!vy||!vz){ return; }
-    var x=parseFloat(dimX.value), y=shape.useY?parseFloat(dimY.value):0, z=parseFloat(dimZ.value);
-    showLoading(function(){
-      var r=window.estimateManual(currentShape,x,y,z,FIXED_INFILL);
-      var sizeText=shape.useY?(x+" × "+y+" × "+z+" mm"):("지름 "+x+" × 높이 "+z+" mm");
-      window.showResult(r,{
-        emailBody:"안녕하세요, 3D 프린팅 견적 문의드립니다.\n\n"+
-          "- 형태: "+shape.name+"\n"+
-          "- 크기: "+sizeText+"\n"+
-          "- 채움율: "+FIXED_INFILL+"%\n"+
-          "- 추정 부피: "+r.volCm3.toFixed(1)+" cm³\n"+
-          "- 필라멘트: "+Math.round(r.filGrams)+"g\n"+
-          "- 예상 출력 시간: "+formatTime(r.printMin)+"\n"+
-          "- 예상 견적: "+fmt(r.low)+"원 ~ "+fmt(r.high)+"원\n\n상세 상담 부탁드립니다."
-      });
-    });
-  });
 
   /* ══════════════════════════════════════════
-   *  견적서 이미지 생성 & 카카오톡 핸들러
+   *  견적서 이미지 생성 & 채널톡 핸들러
    * ══════════════════════════════════════════ */
 
-  function showToast(msg){
-    var toast = $("#copy-toast");
-    $("#toast-msg").textContent = msg || "견적서가 저장되었습니다";
-    toast.classList.add("visible");
-    setTimeout(function(){ toast.classList.remove("visible"); }, 2500);
-  }
+  function showToast(msg){ showSuccessToast(msg || "견적서가 저장되었습니다"); }
 
   function fillQuoteTemplate(){
     var mc = getModelingCost();
@@ -1268,76 +1608,8 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
   }
 
-  function handleKakaoClick(e){
-    e.preventDefault();
-
-    if(!lastResult){
-      if(window.Kakao && Kakao.isInitialized()){
-        Kakao.Channel.chat({ channelPublicId: "_ACNxon" });
-      } else {
-        window.open(CONFIG.KAKAO_CHANNEL+"/chat", "_blank");
-      }
-      return;
-    }
-
-    var mc = getModelingCost();
-    var needsModeling = selectedTier!=="none" && selectedTier!=="custom";
-    var isCustom = selectedTier==="custom";
-    var totalText;
-    var siteUrl = "https://shinhp3.github.io/eoulrimstudio-estimate/";
-
-    if(isCustom){
-      totalText = "추후 협의";
-    } else {
-      totalText = fmt(mc.fee + lastResult.low)+"원 ~ "+fmt(mc.fee + lastResult.high)+"원";
-    }
-
-    var items = [];
-    if(needsModeling) items.push({ item: "모델링", item_op: fmt(mc.fee)+"원" });
-    if(isCustom) items.push({ item: "모델링", item_op: "추후 협의" });
-    items.push({ item: "출력비", item_op: fmt(lastResult.low)+"~"+fmt(lastResult.high)+"원" });
-    items.push({ item: "부피", item_op: lastResult.volCm3.toFixed(1)+" cm³" });
-    items.push({ item: "필라멘트", item_op: Math.round(lastResult.filGrams)+"g" });
-    items.push({ item: "출력시간", item_op: formatTime(lastResult.printMin) });
-
-    var today = new Date();
-    var dateStr = today.getFullYear()+"."+(today.getMonth()+1)+"."+today.getDate();
-
-    if(window.Kakao && Kakao.isInitialized()){
-      Kakao.Share.sendDefault({
-        objectType: "feed",
-        content: {
-          title: "3D 프린팅 견적서",
-          description: "어울,림 Eoulrimstudio · "+dateStr,
-          imageUrl: "https://shinhp3.github.io/eoulrimstudio-estimate/og-image.png",
-          link: { mobileWebUrl: siteUrl, webUrl: siteUrl }
-        },
-        itemContent: {
-          profileText: "어울,림 3D 프린팅",
-          items: items,
-          sum: "예상 금액",
-          sumOp: totalText
-        },
-        buttons: [
-          { title: "견적서 확인하기", link: { mobileWebUrl: siteUrl, webUrl: siteUrl } },
-          { title: "카카오톡 상담", link: { mobileWebUrl: "http://pf.kakao.com/_ACNxon/chat", webUrl: "http://pf.kakao.com/_ACNxon/chat" } }
-        ]
-      });
-    } else {
-      window.open(CONFIG.KAKAO_CHANNEL+"/chat", "_blank");
-    }
-  }
-
-  // Desktop side panel kakao button
-  contactKakao.addEventListener("click", handleKakaoClick);
-
-  // Mobile bottom sheet kakao button
-  var sheetKakao = $("#sheet-kakao");
-  if(sheetKakao){
-    sheetKakao.addEventListener("click", handleKakaoClick);
-  }
-
 })();
+
 </script>
 
 <!-- ════════════════════════════════════════
@@ -1357,7 +1629,6 @@ const removeBtn    = $("#stl-remove-btn");
 const viewerWrap   = $("#viewer-container");
 const canvas       = $("#stl-viewer");
 const viewerInfoEl = $("#viewer-info");
-const calcStlBtn   = $("#calc-stl-btn");
 const resetBtn     = $("#viewer-reset-btn");
 const FIXED_INFILL = 5;
 
@@ -1428,7 +1699,6 @@ function loadSTL(arrayBuffer, filename){
   viewerWrap.classList.remove("hidden");
   fileInfo.classList.remove("hidden");
   filenameEl.textContent = filename;
-  calcStlBtn.disabled = false;
 
   if(meshObj){ scene.remove(meshObj); meshObj.geometry.dispose(); meshObj.material.dispose(); }
 
@@ -1470,7 +1740,6 @@ function clearSTL(){
   fileInfo.classList.add("hidden");
   filenameEl.textContent = "";
   viewerInfoEl.textContent = "";
-  calcStlBtn.disabled = true;
   stlVolumeMm3=0; stlBbox=null; fileInput.value="";
   document.querySelector("#side-panel").classList.remove("has-result");
   document.querySelector("#side-placeholder").style.display="";
@@ -1504,8 +1773,11 @@ function handleFile(file){
   reader.readAsArrayBuffer(file);
 }
 
-calcStlBtn.addEventListener("click", ()=>{
-  if(!stlVolumeMm3||!stlBbox) return;
+window.runStlEstimate = function(){
+  if(!stlVolumeMm3||!stlBbox){
+    window.showGuideToast("STL 파일을 업로드해 주세요.");
+    return;
+  }
   const overlay=document.querySelector("#loading-overlay");
   const bar=document.querySelector("#loading-bar-fill");
   const stepEl=document.querySelector("#loading-step");
@@ -1524,22 +1796,16 @@ calcStlBtn.addEventListener("click", ()=>{
     if(i<steps.length){ bar.style.width=steps[i].pct+"%"; stepEl.textContent=steps[i].text; i++; }
     else {
       clearInterval(iv);
-      setTimeout(()=>{
-        overlay.classList.add("hidden");
+      window.finishEstimateLoading(function(){
         const r = window.estimateFromSTL(stlVolumeMm3, stlBbox, FIXED_INFILL);
         window.showResult(r,{
-          bbox:stlBbox,
-          emailBody:"안녕하세요, 3D 프린팅 견적 문의드립니다.\n\n"+
-            "- 파일: "+filenameEl.textContent+"\n"+
-            "- 크기: "+stlBbox.x.toFixed(1)+" × "+stlBbox.y.toFixed(1)+" × "+stlBbox.z.toFixed(1)+" mm\n"+
-            "- STL 부피: "+r.volCm3.toFixed(1)+" cm³\n"+
-            "- 필라멘트: "+Math.round(r.filGrams)+"g\n"+
-            "- 예상 견적: "+Math.round(r.low).toLocaleString("ko-KR")+"원 ~ "+Math.round(r.high).toLocaleString("ko-KR")+"원\n\n상세 상담 부탁드립니다."
+          bbox: stlBbox,
+          fileName: filenameEl.textContent
         });
-      }, 200);
+      }, true);
     }
   }, 180);
-});
+};
 </script>
 </body>
 </html>
