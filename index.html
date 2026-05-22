@@ -1022,7 +1022,8 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
   }
 
   function isMobileStepNav(){
-    return window.matchMedia("(max-width: 640px)").matches;
+    return window.innerWidth <= 640
+      || window.matchMedia("(max-width: 640px)").matches;
   }
 
   function getStepNavAnchor(){
@@ -1033,7 +1034,6 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     if(!stepNav) return;
     var showNav = (currentMode === "manual" && currentStep >= 2) || currentMode === "stl";
     stepNav.classList.toggle("hidden", !showNav);
-    stepNav.classList.toggle("step-nav--footer", showNav && isMobileStepNav());
     if(showNav){
       var anchor = getStepNavAnchor();
       if(anchor && stepNav.parentElement !== anchor){ anchor.appendChild(stepNav); }
@@ -1412,6 +1412,9 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
 
   updateStepNav();
   window.addEventListener("resize", updateStepNav);
+  window.addEventListener("orientationchange", function(){
+    setTimeout(updateStepNav, 100);
+  });
 
   function showUpdatedBadge(){
     var badge = $("#result-updated");
