@@ -304,6 +304,15 @@ body.scroll-locked {
 .step-crumb.completed + .step-crumb-sep { background: var(--success); }
 .step-crumb.completed:hover { background: rgba(37,99,235,.03); }
 
+/* STL 경로: 2단계(출력 파일 → STL 업로드)만 표시 */
+.step-breadcrumb.breadcrumb-stl .step-crumb[data-step="3"],
+.step-breadcrumb.breadcrumb-stl .step-crumb-sep:last-of-type {
+  display: none;
+}
+.step-breadcrumb.breadcrumb-stl .step-crumb[data-step="2"] .step-crumb-value {
+  max-width: 120px;
+}
+
 .card-head {
   display: flex;
   align-items: flex-start;
@@ -367,10 +376,24 @@ body.scroll-locked {
   border: 1px solid var(--blue);
   box-shadow: 0 2px 10px rgba(37,99,235,.22);
 }
-.step-nav-next:hover {
+.step-nav-next:hover:not(:disabled) {
   background: var(--blue-hover);
   border-color: var(--blue-hover);
   box-shadow: 0 4px 14px rgba(37,99,235,.28);
+}
+.step-nav-next:disabled {
+  background: var(--tx-300);
+  border-color: var(--tx-300);
+  color: #fff;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: .65;
+}
+.step-nav-back.hidden { display: none; }
+.card-head-step-nav {
+  margin-top: 20px;
+  padding-top: 0;
+  border-top: none;
 }
 
 /* ════════════════════════════════════════════
@@ -420,6 +443,13 @@ body.scroll-locked {
   box-shadow: var(--sh-md), 0 0 0 3px var(--blue-ring);
   transform: translateY(-2px);
 }
+.entry-card.selected {
+  border-color: var(--blue);
+  background: var(--blue-dim);
+  box-shadow: var(--sh-md), 0 0 0 3px var(--blue-ring);
+}
+.entry-card.selected .entry-card-title { color: var(--blue); }
+.entry-card.selected .entry-card-visual svg { opacity: .85; }
 .entry-card:focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 2px;
@@ -428,17 +458,19 @@ body.scroll-locked {
   flex: 1;
   min-height: 148px;
   display: flex; align-items: center; justify-content: center;
-  background: var(--bg-subtle);
+  background: linear-gradient(165deg, rgba(37,99,235,.14) 0%, var(--bg-subtle) 62%);
   border-bottom: 1px solid var(--bd-lite);
+  color: var(--blue);
 }
-.entry-card-visual svg { opacity: .6; width: 48px; height: 48px; }
+.entry-card-visual svg { opacity: .72; width: 48px; height: 48px; }
+.entry-card:hover .entry-card-visual svg { opacity: .85; }
 .entry-card-body {
   padding: 18px 16px 22px;
   flex-shrink: 0;
 }
 .entry-card-title {
-  font-size: 1rem; font-weight: 700;
-  color: var(--tx-900); letter-spacing: -.02em;
+  font-size: 1.0625rem; font-weight: 700;
+  color: var(--tx-900); letter-spacing: -.025em;
   margin-bottom: 6px;
 }
 .entry-card-desc {
@@ -1304,7 +1336,7 @@ body.scroll-locked {
   .entry-card-visual { min-height: 72px; flex: none; }
   .entry-card-visual svg { width: 36px; height: 36px; }
   .entry-card-body { padding: 12px 12px 14px; }
-  .entry-card-title { font-size: .8125rem; }
+  .entry-card-title { font-size: .875rem; }
   .entry-card-desc { font-size: .75rem; }
   .estimate-panel-body {
     gap: 14px;

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3D 프린팅 견적 계산기 — 어울,림 Eoulrimstudio</title>
+<title>3D출력 견적 계산기 — 어울,림 Eoulrimstudio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -47,18 +47,18 @@
 
   <!-- ── Hero ── -->
   <header class="hero">
-    <div class="hero-badge">PLA 소재 전용</div>
-    <h1><em>3D 프린팅</em><br>견적 계산기</h1>
-    <p class="hero-sub">STL 파일이나 간단한 치수만으로 <strong>3D 프린팅 예상 비용</strong>을 확인해보세요.</p>
-    <p class="hero-subcopy">출력 난이도와 형상에 따라 실제 견적은 상담 후 확정됩니다.</p>
+    <div class="hero-badge">도자기·공예 3D출력</div>
+    <h1><em>3D출력</em><br>견적 계산기</h1>
+    <p class="hero-sub">어울림은 <strong>도자기·공예 분야</strong>에 특화된 3D출력을 제공합니다. 모델 보유 여부에 따라 예상 비용을 확인해 보세요.</p>
+    <p class="hero-subcopy">형상·난이도에 따라 실제 견적은 상담 후 확정됩니다.</p>
     <div class="hero-trust">
       <span class="hero-trust-item">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
-        PLA 출력
+        도자기 전문
       </span>
       <span class="hero-trust-item">
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-        STL 지원
+        STL 견적
       </span>
       <span class="hero-trust-item">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -80,17 +80,17 @@
 
     <nav class="step-breadcrumb" id="step-breadcrumb" aria-label="견적 진행 단계">
       <button class="step-crumb active" data-step="1" type="button" aria-current="step">
-        <span class="step-crumb-top"><span class="step-crumb-num">1</span><span class="step-crumb-title">입력 방식</span></span>
+        <span class="step-crumb-top"><span class="step-crumb-num">1</span><span class="step-crumb-title" id="crumb-title-1">출력 파일</span></span>
         <span class="step-crumb-value" id="crumb-val-1"></span>
       </button>
       <span class="step-crumb-sep"></span>
       <button class="step-crumb" data-step="2" type="button" disabled>
-        <span class="step-crumb-top"><span class="step-crumb-num">2</span><span class="step-crumb-title">모델링</span></span>
+        <span class="step-crumb-top"><span class="step-crumb-num">2</span><span class="step-crumb-title" id="crumb-title-2">모델링</span></span>
         <span class="step-crumb-value" id="crumb-val-2"></span>
       </button>
       <span class="step-crumb-sep"></span>
       <button class="step-crumb" data-step="3" type="button" disabled>
-        <span class="step-crumb-top"><span class="step-crumb-num">3</span><span class="step-crumb-title">형태·치수</span></span>
+        <span class="step-crumb-top"><span class="step-crumb-num">3</span><span class="step-crumb-title" id="crumb-title-3">형태·치수</span></span>
         <span class="step-crumb-value" id="crumb-val-3"></span>
       </button>
     </nav>
@@ -100,33 +100,34 @@
       <button class="step-nav-btn step-nav-next" id="step-nav-next" type="button">다음</button>
     </div>
 
-    <!-- ═══ Step 1: 입력 방식 선택 ═══ -->
+    <!-- ═══ Step 1: 3D출력 모델 보유 여부 ═══ -->
     <div class="step-panel" id="step-1">
       <div class="card">
-        <div class="section-title">견적 방식을 선택하세요</div>
+        <div class="section-title">출력 파일을 보유하고 계신가요?</div>
+        <p class="section-subtitle">STL 등 3D 출력용 파일이 있으면 업로드 후 견적하고, 없으면 치수로 예상 견적을 확인할 수 있습니다.</p>
         <div class="entry-cards">
-          <button class="entry-card" id="btn-choose-stl" type="button" aria-label="STL 파일 업로드로 견적 계산">
-            <div class="entry-card-visual">
-              <svg viewBox="0 0 48 48" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <button class="entry-card entry-card--has-file" id="btn-choose-stl" type="button" aria-label="출력 파일 보유, STL 파일 업로드">
+            <div class="entry-card-visual" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M24 5L6 15v18l18 10 18-10V15L24 5z"/>
                 <path d="M24 5v23M6 15l18 10 18-10"/>
               </svg>
             </div>
             <div class="entry-card-body">
-              <div class="entry-card-title">STL 파일 업로드</div>
-              <div class="entry-card-desc">3D 파일로 정밀 견적</div>
+              <div class="entry-card-title">출력 파일 보유</div>
+              <div class="entry-card-desc">STL 파일 업로드 · 정밀 견적</div>
             </div>
           </button>
-          <button class="entry-card" id="btn-choose-manual" type="button" aria-label="치수 입력으로 견적 계산">
-            <div class="entry-card-visual">
-              <svg viewBox="0 0 48 48" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <button class="entry-card entry-card--no-file" id="btn-choose-manual" type="button" aria-label="출력 파일 미보유, 치수로 견적">
+            <div class="entry-card-visual" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="4" y="18" width="40" height="14" rx="3"/>
                 <path d="M12 18v7M20 18v5M28 18v7M36 18v5"/>
               </svg>
             </div>
             <div class="entry-card-body">
-              <div class="entry-card-title">치수로 계산하기</div>
-              <div class="entry-card-desc">파일 없이 빠른 견적</div>
+              <div class="entry-card-title">출력 파일 미보유</div>
+              <div class="entry-card-desc">치수 입력 · 예비 견적</div>
             </div>
           </button>
         </div>
@@ -146,8 +147,8 @@
         <div class="modeling-intro" id="go-stl-card">
           <div class="go-stl-inner">
             <div class="go-stl-text">
-              <strong>이미 3D 파일이 있으신가요?</strong>
-              <span>STL 파일을 업로드하면 모델링 없이 바로 견적을 확인할 수 있어요.</span>
+              <strong>3D출력 모델이 있으신가요?</strong>
+              <span>STL을 업로드하면 모델링 없이 바로 견적을 확인할 수 있어요.</span>
             </div>
             <button type="button" id="go-stl-link" class="go-stl-btn">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6M9 15l3-3 3 3"/></svg>
@@ -312,7 +313,7 @@
           <path d="M9 7h6M9 11h6M9 15h4"/>
           <rect x="4" y="3" width="16" height="18" rx="2"/>
         </svg>
-        <p>치수를 입력하거나 STL 파일을 업로드하면 견적이 여기에 표시됩니다</p>
+        <p>모델(STL)을 업로드하거나 치수를 입력하면 견적이 여기에 표시됩니다</p>
       </div>
 
       <div class="estimate-panel-body">
@@ -799,8 +800,8 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     var items = [];
 
     items.push({
-      label: "입력 방식",
-      value: currentMode === "stl" ? "STL 파일 업로드" : "치수로 계산"
+      label: "견적 방식",
+      value: currentMode === "stl" ? "출력 파일 보유" : "출력 파일 미보유"
     });
 
     if(currentMode === "stl"){
@@ -916,6 +917,20 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
   var currentMode = null;
   var TIER_LABELS = {none:"모델 보유", lite:"Lite", standard:"Standard", premium:"Premium", custom:"Custom"};
 
+  function areDimensionsComplete(){
+    if(!currentShape || !SHAPES[currentShape]) return false;
+    var shape = SHAPES[currentShape];
+    var x = parseFloat(dimX.value);
+    var z = parseFloat(dimZ.value);
+    if(!dimX.value || isNaN(x) || x <= 0) return false;
+    if(!dimZ.value || isNaN(z) || z <= 0) return false;
+    if(shape.useY){
+      var y = parseFloat(dimY.value);
+      if(!dimY.value || isNaN(y) || y <= 0) return false;
+    }
+    return true;
+  }
+
   var RECOMMEND_MAP = {
     lite:     {title:"추천 등급: Lite", desc:"단순 도형 제작에 적합합니다. 박스, 원통 등 기본 형태."},
     standard: {title:"추천 등급: Standard", desc:"곡면이 포함된 생활소품, 제품 형태 제작에 적합합니다."},
@@ -1008,16 +1023,55 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
       var head = getActiveCardHead();
       if(head && stepNav.parentElement !== head){ head.appendChild(stepNav); }
     }
+    if(stepNavBack){
+      stepNavBack.classList.remove("hidden");
+    }
     if(!showNav || !stepNavNext) return;
     if(currentMode === "stl" || currentStep === 3){
       stepNavNext.textContent = "견적 계산";
     } else {
       stepNavNext.textContent = "다음";
     }
+    if(currentMode === "manual" && currentStep === 2){
+      stepNavNext.disabled = !selectedTier;
+    } else if(currentMode === "manual" && currentStep === 3){
+      stepNavNext.disabled = !areDimensionsComplete();
+    } else {
+      stepNavNext.disabled = false;
+    }
+  }
+
+  function getStlFileName(){
+    var el = $("#stl-filename");
+    return el && el.textContent ? el.textContent.trim() : "";
+  }
+
+  function setBreadcrumbTitles(){
+    var t1 = $("#crumb-title-1");
+    var t2 = $("#crumb-title-2");
+    var t3 = $("#crumb-title-3");
+    if(currentMode === "stl"){
+      if(t1) t1.textContent = "출력 파일";
+      if(t2) t2.textContent = "STL 업로드";
+    } else {
+      if(t1) t1.textContent = "출력 파일";
+      if(t2) t2.textContent = "모델링";
+      if(t3) t3.textContent = "형태·치수";
+    }
   }
 
   function updateBreadcrumb(){
-    var step3Done = currentMode === "manual" && currentStep === 3 && currentShape !== "";
+    var breadcrumb = $("#step-breadcrumb");
+    var step3Done = currentMode === "manual" && currentStep === 3 && areDimensionsComplete();
+    var stlFileName = getStlFileName();
+    var stlFileReady = currentMode === "stl" && !!stlFileName;
+
+    if(breadcrumb){
+      breadcrumb.classList.toggle("breadcrumb-stl", currentMode === "stl");
+      breadcrumb.classList.toggle("breadcrumb-manual", currentMode === "manual");
+      breadcrumb.classList.toggle("breadcrumb-idle", !currentMode);
+    }
+    setBreadcrumbTitles();
 
     $$(".step-crumb").forEach(function(crumb){
       var step = parseInt(crumb.dataset.step);
@@ -1026,12 +1080,30 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
       crumb.removeAttribute("aria-current");
 
       if(currentMode === "stl"){
-        if(step === 1){ crumb.classList.add("completed"); crumb.disabled = false; }
+        if(step === 1){
+          crumb.classList.add("completed");
+          crumb.disabled = false;
+        } else if(step === 2){
+          if(stlFileReady){
+            crumb.classList.add("completed");
+          } else {
+            crumb.classList.add("active");
+            crumb.setAttribute("aria-current","step");
+          }
+        }
+      } else if(!currentMode){
+        if(step === 1){
+          crumb.classList.add("active");
+          crumb.setAttribute("aria-current","step");
+        }
       } else {
-        if(step < currentStep){ crumb.classList.add("completed"); crumb.disabled = false; }
-        else if(step === currentStep){
+        if(step < currentStep){
+          crumb.classList.add("completed");
+          crumb.disabled = false;
+        } else if(step === currentStep){
           if(step === 3 && step3Done){
-            crumb.classList.add("completed"); crumb.disabled = false;
+            crumb.classList.add("completed");
+            crumb.disabled = false;
           } else {
             crumb.classList.add("active");
             crumb.setAttribute("aria-current","step");
@@ -1040,16 +1112,23 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
       }
     });
 
-    $("#crumb-val-1").textContent = currentMode === "stl" ? "STL 업로드" : (currentMode === "manual" ? "치수 계산" : "");
-    $("#crumb-val-2").textContent = currentMode === "manual" && currentStep > 2 ? TIER_LABELS[selectedTier]||"" : "";
-    $("#crumb-val-3").textContent = currentMode === "manual" && currentStep >= 3 && currentShape ? (SHAPES[currentShape]?SHAPES[currentShape].name:"") : "";
+    $("#crumb-val-1").textContent = currentMode === "stl" ? "출력 파일 보유" : (currentMode === "manual" ? "출력 파일 미보유" : "");
+    if(currentMode === "stl"){
+      $("#crumb-val-2").textContent = stlFileName || "업로드 대기";
+      $("#crumb-val-3").textContent = "";
+    } else {
+      $("#crumb-val-2").textContent = currentMode === "manual" && currentStep > 2 ? TIER_LABELS[selectedTier]||"" : "";
+      $("#crumb-val-3").textContent = currentMode === "manual" && currentStep >= 3 && currentShape ? (SHAPES[currentShape]?SHAPES[currentShape].name:"") : "";
+    }
   }
+  window.updateEstimateBreadcrumb = updateBreadcrumb;
 
   $$(".step-crumb").forEach(function(crumb){
     crumb.addEventListener("click", function(){
       if(crumb.disabled) return;
       var step = parseInt(crumb.dataset.step);
       if(step < currentStep && currentMode === "manual"){
+        if(step === 1) currentMode = null;
         goToStep(step);
       } else if(currentMode === "stl" && step === 1){
         currentMode = null;
@@ -1257,6 +1336,7 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
       resultEl.classList.remove("hidden");
 
       selectedTier = tier;
+      updateStepNav();
 
       if(lastResult){
         renderResult();
@@ -1338,6 +1418,7 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
       currentShape = btn.dataset.shape;
       applyShape();
       updateBreadcrumb();
+      updateStepNav();
       updateRtPreview();
       if(lastResult){
         recalcManual();
@@ -1401,6 +1482,8 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
       if(el.value) validateField(el, el.closest(".field").id);
       checkDimWarning(el);
       updateRtPreview();
+      updateBreadcrumb();
+      updateStepNav();
     });
   });
 
@@ -1732,6 +1815,7 @@ function loadSTL(arrayBuffer, filename){
 
   initCamPos = camera.position.clone();
   resizeViewer();
+  if(window.updateEstimateBreadcrumb) window.updateEstimateBreadcrumb();
 }
 
 function clearSTL(){
@@ -1742,6 +1826,7 @@ function clearSTL(){
   viewerInfoEl.textContent = "";
   stlVolumeMm3=0; stlBbox=null; fileInput.value="";
   document.querySelector("#side-panel").classList.remove("has-result");
+  if(window.updateEstimateBreadcrumb) window.updateEstimateBreadcrumb();
   document.querySelector("#side-placeholder").style.display="";
   document.querySelector("#mobile-quote-bar").classList.remove("visible");
 }
