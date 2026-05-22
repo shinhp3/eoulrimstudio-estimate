@@ -1014,13 +1014,29 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
     return null;
   }
 
+  function getActiveStepCard(){
+    if(currentMode === "stl") return $("#panel-stl .card");
+    if(currentMode === "manual" && currentStep === 2) return $("#step-2 .card");
+    if(currentMode === "manual" && currentStep === 3) return $("#step-3 .card");
+    return null;
+  }
+
+  function isMobileStepNav(){
+    return window.matchMedia("(max-width: 640px)").matches;
+  }
+
+  function getStepNavAnchor(){
+    return isMobileStepNav() ? getActiveStepCard() : getActiveCardHead();
+  }
+
   function updateStepNav(){
     if(!stepNav) return;
     var showNav = (currentMode === "manual" && currentStep >= 2) || currentMode === "stl";
     stepNav.classList.toggle("hidden", !showNav);
+    stepNav.classList.toggle("step-nav--footer", showNav && isMobileStepNav());
     if(showNav){
-      var head = getActiveCardHead();
-      if(head && stepNav.parentElement !== head){ head.appendChild(stepNav); }
+      var anchor = getStepNavAnchor();
+      if(anchor && stepNav.parentElement !== anchor){ anchor.appendChild(stepNav); }
     }
     if(stepNavBack){
       stepNavBack.classList.remove("hidden");
@@ -1395,6 +1411,7 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
   }
 
   updateStepNav();
+  window.addEventListener("resize", updateStepNav);
 
   function showUpdatedBadge(){
     var badge = $("#result-updated");
