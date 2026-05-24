@@ -703,20 +703,24 @@ var CONFIG = {
     premium:  { fee: 150000, label: "Premium (복잡·장식)" },
     custom:   { fee: 0,      label: "Custom (추후 협의)" },
   },
-  // Kiri:Moto P1S 프로파일 설정
+  // Kiri:Moto P1S 프로파일 (공식 필드명: extruders[].extFilament / extNozzle)
   KIRI_DEVICE: {
     bedWidth:    256,
     bedDepth:    256,
     maxHeight:   256,
-    filamentSize: 1.75,
-    nozzleSize:  0.4
+    extruders: [{
+      extFilament: 1.75,
+      extNozzle:   0.4,
+      extOffsetX:  0,
+      extOffsetY:  0
+    }]
   },
   KIRI_PROCESS: {
     sliceHeight:       0.2,
     sliceShells:       2,
     sliceFillAngle:    45,
-    /* 견적 속도: grid (gyroid보다 훨씬 빠름, 필라량은 비슷한 편) */
-    sliceFillType:     "grid",
+    /* 견적 속도: hex 기본값 (gyroid보다 빠름) */
+    sliceFillType:     "hex",
     sliceFillSparse:   0.05,
     sliceSupportEnable: false,
     sliceAdaptive:     false,
@@ -975,11 +979,9 @@ function withKiriTimeout(promise, label){
   ]);
 }
 
-window.getKiriEngineInstance = async function(){
+window.createKiriEngine = async function(){
   await window.ensureKiriEngine();
-  if(window.__kiriEngineSingleton) return window.__kiriEngineSingleton;
   var engine = window.kiriNewEngine();
-  engine.setRender(false);
   engine.setController({ threaded: true });
   engine.setListener(function(msg){
     var note = kiriProgressMessage(msg);
@@ -990,7 +992,6 @@ window.getKiriEngineInstance = async function(){
       window.reportKiriSliceProgress(msg, note);
     }
   });
-  window.__kiriEngineSingleton = engine;
   return engine;
 };
 
@@ -1040,19 +1041,16 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct, on
     recordStlDebug({ source: "slicing", message: "Kiri 시작…" });
     prog(12, "슬라이서 준비 중");
 
-    var engine = await window.getKiriEngineInstance();
-    engine.clear();
-
+    var engine = await window.createKiriEngine();
     var process = Object.assign({}, CONFIG.KIRI_PROCESS, {
       sliceFillSparse: infPct / 100
     });
 
-    engine.setMode("FDM");
-    engine.setDevice(CONFIG.KIRI_DEVICE);
-    engine.setProcess(process);
-
     prog(18, "모델 파싱 중");
     await withKiriTimeout(engine.parse(stlArrayBuffer), "STL 파싱");
+
+    engine.setProcess(process);
+    engine.setDevice(CONFIG.KIRI_DEVICE);
 
     recordStlDebug({ source: "slicing", message: "레이어 슬라이싱…" });
     prog(30, "레이어 슬라이싱 중");
@@ -1100,9 +1098,12 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct, on
     return attachStlDebug({ volCm3, matCm3, filGrams, printMin: totalMin, low, high });
 
   } catch(err){
+    var errMsg = err && err.message ? err.message : String(err);
+    var errStack = err && err.stack ? String(err.stack).split("\n").slice(0, 4).join(" | ") : "";
     recordStlDebug({
       source: "kiri-error",
-      error: err && err.message ? err.message : String(err)
+      error: errMsg,
+      stack: errStack || undefined
     });
     return estimateFromSTLFallback(volMm3, bbox, infPct, "kiri-error");
   }
