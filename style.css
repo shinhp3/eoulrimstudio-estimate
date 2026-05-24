@@ -826,6 +826,43 @@ body.scroll-locked {
 .side-panel:not(.has-result) .order-notice,
 .side-panel:not(.has-result) .order-step-badge { display: none; }
 
+/* 예상 견적 패널 — STL 슬라이싱 진행 */
+.estimate-loading {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 48px 28px 56px;
+  text-align: center;
+}
+.side-panel.is-estimating .estimate-loading { display: flex; }
+.side-panel.is-estimating .side-placeholder,
+.side-panel.is-estimating .estimate-panel-body,
+.side-panel.is-estimating .order-notice { display: none !important; }
+.estimate-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--bd);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+}
+.estimate-loading-text {
+  font-size: .9375rem;
+  font-weight: 700;
+  color: var(--tx-900);
+  margin: 0;
+  line-height: 1.45;
+}
+.estimate-loading-bar-track { width: 100%; max-width: 240px; }
+.estimate-loading-step {
+  font-size: .8125rem;
+  color: var(--tx-400);
+  font-weight: 500;
+  margin: 0;
+}
+
 .estimate-panel-body {
   display: flex;
   flex-direction: column;
@@ -1385,6 +1422,8 @@ body.scroll-locked {
   }
   .order-summary { padding: 20px 18px; }
   .side-placeholder { padding: 40px 20px 48px; }
+  .estimate-loading { padding: 40px 20px 48px; }
+  .estimate-loading-bar-track { max-width: 100%; }
   .card {
     display: flex;
     flex-direction: column;

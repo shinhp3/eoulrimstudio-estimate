@@ -318,6 +318,15 @@
         <p>모델(STL)을 업로드하거나 치수를 입력하면 견적이 여기에 표시됩니다</p>
       </div>
 
+      <div class="estimate-loading hidden" id="estimate-loading" aria-live="polite" aria-busy="true">
+        <div class="estimate-loading-spinner" aria-hidden="true"></div>
+        <p class="estimate-loading-text" id="estimate-loading-text">STL 모델을 분석하고 있습니다…</p>
+        <div class="loading-bar-track estimate-loading-bar-track">
+          <div class="loading-bar-fill" id="estimate-loading-bar"></div>
+        </div>
+        <p class="estimate-loading-step" id="estimate-loading-step">견적 준비 중</p>
+      </div>
+
       <div class="estimate-panel-body">
       <div class="order-selection" id="order-selection">
         <div class="order-selection-title">선택 옵션</div>
@@ -706,13 +715,17 @@ var CONFIG = {
     sliceHeight:       0.2,
     sliceShells:       2,
     sliceFillAngle:    45,
-    sliceFillType:     "gyroid",
+    /* 견적 속도: grid (gyroid보다 훨씬 빠름, 필라량은 비슷한 편) */
+    sliceFillType:     "grid",
     sliceFillSparse:   0.05,
     sliceSupportEnable: false,
+    sliceAdaptive:     false,
+    detectThinWalls:   false,
     outputFeedrate:    200,
     outputSeekrate:    250,
     firstSliceHeight:  0.2
   },
+  KIRI_SLICE_TIMEOUT_MS: 120000,
   // Kiri:Moto → P1S 보정계수 (실측 데이터로 추후 튜닝)
   P1S_FILAMENT_FACTOR: 1.0,
   P1S_TIME_FACTOR:     1.0,
@@ -941,8 +954,71 @@ window.ensureKiriEngine = function(){
   return window.__kiriEnginePromise;
 };
 
-window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct){
+function kiriProgressMessage(msg){
+  if(!msg) return "Kiri 처리 중…";
+  if(msg.slice) return "레이어 슬라이싱…";
+  if(msg.prepare && msg.prepare.update != null){
+    return "경로 생성 " + Math.round(msg.prepare.update * 100) + "%";
+  }
+  if(msg.prepare && msg.prepare.done) return "gcode 준비…";
+  if(msg.export) return "gcode 생성…";
+  return "Kiri 처리 중…";
+}
+
+function withKiriTimeout(promise, label){
+  var ms = CONFIG.KIRI_SLICE_TIMEOUT_MS || 120000;
+  return Promise.race([
+    promise,
+    new Promise(function(_resolve, reject){
+      setTimeout(function(){ reject(new Error(label + " (" + Math.round(ms/1000) + "s 초과)")); }, ms);
+    })
+  ]);
+}
+
+window.getKiriEngineInstance = async function(){
+  await window.ensureKiriEngine();
+  if(window.__kiriEngineSingleton) return window.__kiriEngineSingleton;
+  var engine = window.kiriNewEngine();
+  engine.setRender(false);
+  engine.setController({ threaded: true });
+  engine.setListener(function(msg){
+    var note = kiriProgressMessage(msg);
+    if(window.isStlEstimateDebug && window.isStlEstimateDebug()){
+      recordStlDebug({ source: "slicing", message: note });
+    }
+    if(typeof window.reportKiriSliceProgress === "function"){
+      window.reportKiriSliceProgress(msg, note);
+    }
+  });
+  window.__kiriEngineSingleton = engine;
+  return engine;
+};
+
+window.reportKiriSliceProgress = function(msg, note){
+  var pct = 40;
+  if(msg && msg.prepare && msg.prepare.update != null){
+    pct = 52 + msg.prepare.update * 33;
+  } else if(msg && msg.export){
+    pct = 88;
+  } else if(msg && msg.slice){
+    pct = 42;
+  }
+  if(typeof window.reportEstimateProgress === "function"){
+    window.reportEstimateProgress({ pct: pct, step: note || "Kiri 처리 중…" });
+  }
+};
+
+window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct, onProgress){
   var volCm3 = volMm3 / 1000;
+  function prog(pct, step, title){
+    if(onProgress){
+      onProgress({
+        pct: pct,
+        step: step,
+        title: title || "STL 모델을 분석하고 있습니다…"
+      });
+    }
+  }
 
   if(!stlArrayBuffer){
     recordStlDebug({ source: "kiri-unavailable", hasStl: false });
@@ -950,6 +1026,7 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct){
   }
 
   try {
+    prog(5, "슬라이서 엔진 로드 중");
     await window.ensureKiriEngine();
   } catch(loadErr){
     recordStlDebug({
@@ -960,10 +1037,11 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct){
   }
 
   try {
-    recordStlDebug({ source: "slicing", message: "Kiri 슬라이싱 중…" });
+    recordStlDebug({ source: "slicing", message: "Kiri 시작…" });
+    prog(12, "슬라이서 준비 중");
 
-    var engine = window.kiriNewEngine();
-    engine.setRender(false);
+    var engine = await window.getKiriEngineInstance();
+    engine.clear();
 
     var process = Object.assign({}, CONFIG.KIRI_PROCESS, {
       sliceFillSparse: infPct / 100
@@ -973,11 +1051,20 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct){
     engine.setDevice(CONFIG.KIRI_DEVICE);
     engine.setProcess(process);
 
-    await engine.parse(stlArrayBuffer);
+    prog(18, "모델 파싱 중");
+    await withKiriTimeout(engine.parse(stlArrayBuffer), "STL 파싱");
 
-    await engine.slice();
-    await engine.prepare();
-    var gcode = await engine.export();
+    recordStlDebug({ source: "slicing", message: "레이어 슬라이싱…" });
+    prog(30, "레이어 슬라이싱 중");
+    await withKiriTimeout(engine.slice(), "슬라이싱");
+
+    recordStlDebug({ source: "slicing", message: "경로 생성…" });
+    prog(52, "경로 생성 중");
+    await withKiriTimeout(engine.prepare(), "경로 생성");
+
+    recordStlDebug({ source: "slicing", message: "gcode 생성…" });
+    prog(88, "gcode 생성 중");
+    var gcode = await withKiriTimeout(engine.export(), "gcode 생성");
 
     var filamentMm = parseKiriFilament(gcode);
     var printSec   = parseKiriTime(gcode);
@@ -1002,6 +1089,7 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct){
     var low  = Math.max(Math.ceil(subtotal * (1 - CONFIG.RANGE) / 1000) * 1000, CONFIG.MIN_PRICE);
     var high = Math.ceil(subtotal * (1 + CONFIG.RANGE) / 1000) * 1000;
 
+    prog(96, "견적 정리 중");
     recordStlDebug({
       source: "kiri",
       filamentMm: filamentMm,
@@ -1618,6 +1706,56 @@ window.attachStlDebug = function(result){
     }, 300);
   }
   window.finishEstimateLoading = finishEstimateLoading;
+
+  function showEstimatePanelLoading(title, step, pct){
+    var panel = $("#side-panel");
+    var block = $("#estimate-loading");
+    if(!panel || !block) return;
+    panel.classList.add("is-estimating");
+    block.classList.remove("hidden");
+    block.setAttribute("aria-busy", "true");
+    window.reportEstimateProgress({
+      pct: pct != null ? pct : 0,
+      step: step || "견적 준비 중",
+      title: title || "STL 모델을 분석하고 있습니다…"
+    });
+    var mobilePrice = $("#mobile-bar-price");
+    if(mobilePrice){
+      if(mobilePrice.dataset.prevPrice === undefined){
+        mobilePrice.dataset.prevPrice = mobilePrice.textContent;
+      }
+      mobilePrice.textContent = "계산 중…";
+    }
+    runEstimateScrollAnimation();
+  }
+
+  function hideEstimatePanelLoading(){
+    var panel = $("#side-panel");
+    var block = $("#estimate-loading");
+    if(panel) panel.classList.remove("is-estimating");
+    if(block){
+      block.classList.add("hidden");
+      block.setAttribute("aria-busy", "false");
+    }
+    var mobilePrice = $("#mobile-bar-price");
+    if(mobilePrice && mobilePrice.dataset.prevPrice !== undefined){
+      mobilePrice.textContent = mobilePrice.dataset.prevPrice;
+      delete mobilePrice.dataset.prevPrice;
+    }
+  }
+  window.showEstimatePanelLoading = showEstimatePanelLoading;
+  window.hideEstimatePanelLoading = hideEstimatePanelLoading;
+
+  window.reportEstimateProgress = function(opts){
+    opts = opts || {};
+    var pct = Math.min(100, Math.max(0, opts.pct != null ? opts.pct : 0));
+    var bar = $("#estimate-loading-bar");
+    var stepEl = $("#estimate-loading-step");
+    var textEl = $("#estimate-loading-text");
+    if(bar) bar.style.width = pct + "%";
+    if(stepEl && opts.step) stepEl.textContent = opts.step;
+    if(textEl && opts.title) textEl.textContent = opts.title;
+  };
 
   function showSideResult(){
     $("#side-panel").classList.add("has-result");
@@ -2247,33 +2385,36 @@ window.runStlEstimate = async function(){
     window.showGuideToast("STL 파일을 업로드해 주세요.");
     return;
   }
-  const overlay=document.querySelector("#loading-overlay");
-  const bar=document.querySelector("#loading-bar-fill");
-  const stepEl=document.querySelector("#loading-step");
-  const textEl=document.querySelector("#loading-text");
-  const steps=[
-    {text:"메쉬 분석 중",pct:20},{text:"부피 계산 중",pct:45},
-    {text:"재료 소요량 분석 중",pct:65},{text:"출력 시간 추정 중",pct:85},
-    {text:"견적 산출 중",pct:95},{text:"완료!",pct:100}
-  ];
-  overlay.classList.remove("hidden");
-  bar.style.width="0%";
-  stepEl.textContent=steps[0].text;
-  textEl.textContent="STL 모델을 분석하고 있습니다...";
-  let i=0;
-  const iv=setInterval(()=>{
-    if(i<steps.length){ bar.style.width=steps[i].pct+"%"; stepEl.textContent=steps[i].text; i++; }
-    else {
-      clearInterval(iv);
-      window.finishEstimateLoading(async function(){
-        const r = await window.estimateFromSTL(stlVolumeMm3, stlBbox, stlArrayBuffer, FIXED_INFILL);
-        window.showResult(r,{
-          bbox: stlBbox,
-          fileName: filenameEl.textContent
-        });
-      }, true);
-    }
-  }, 180);
+  if(!window.showEstimatePanelLoading){
+    window.showGuideToast("페이지 로딩이 완료된 뒤 다시 시도해 주세요.");
+    return;
+  }
+  window.showEstimatePanelLoading("STL 모델을 분석하고 있습니다…", "견적 준비 중", 0);
+  try {
+    var r = await window.estimateFromSTL(
+      stlVolumeMm3,
+      stlBbox,
+      stlArrayBuffer,
+      FIXED_INFILL,
+      window.reportEstimateProgress
+    );
+    window.reportEstimateProgress({
+      pct: 100,
+      step: "완료",
+      title: "견적이 산출되었습니다"
+    });
+    window.finishEstimateLoading(function(){
+      window.hideEstimatePanelLoading();
+      window.showResult(r, {
+        bbox: stlBbox,
+        fileName: filenameEl.textContent
+      });
+    }, true);
+  } catch(err){
+    window.hideEstimatePanelLoading();
+    window.showGuideToast("견적 계산 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+    console.error(err);
+  }
 };
 </script>
 
