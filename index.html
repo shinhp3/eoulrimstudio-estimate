@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3D출력 견적 계산기 — 어울,림 Eoulrimstudio</title>
+<link rel="icon" href="assets/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -919,10 +921,17 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct){
   var volCm3 = volMm3 / 1000;
 
   if(!stlArrayBuffer || typeof kiri === 'undefined'){
-    return estimateFromSTLFallback(volMm3, bbox, infPct);
+    recordStlDebug({
+      source: "kiri-unavailable",
+      kiriType: typeof kiri,
+      hasStl: !!stlArrayBuffer
+    });
+    return estimateFromSTLFallback(volMm3, bbox, infPct, "kiri-unavailable");
   }
 
   try {
+    recordStlDebug({ source: "slicing", message: "Kiri 슬라이싱 중…" });
+
     var engine = kiri.newEngine();
     engine.setRender(false);
 
@@ -944,8 +953,11 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct){
     var printSec   = parseKiriTime(gcode);
 
     if(!filamentMm || !printSec){
-      console.warn("Kiri:Moto gcode 파싱 실패, fallback 사용");
-      return estimateFromSTLFallback(volMm3, bbox, infPct);
+      recordStlDebug({
+        source: "kiri-parse-fail",
+        gcodeHead: String(gcode).slice(0, 400)
+      });
+      return estimateFromSTLFallback(volMm3, bbox, infPct, "kiri-parse-fail");
     }
 
     var filamentCm3 = filamentMm * Math.PI * Math.pow(1.75/2/10, 2);
@@ -960,11 +972,21 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct){
     var low  = Math.max(Math.ceil(subtotal * (1 - CONFIG.RANGE) / 1000) * 1000, CONFIG.MIN_PRICE);
     var high = Math.ceil(subtotal * (1 + CONFIG.RANGE) / 1000) * 1000;
 
-    return { volCm3, matCm3, filGrams, printMin: totalMin, low, high };
+    recordStlDebug({
+      source: "kiri",
+      filamentMm: filamentMm,
+      printSec: printSec,
+      filGrams: filGrams,
+      printMin: totalMin
+    });
+    return attachStlDebug({ volCm3, matCm3, filGrams, printMin: totalMin, low, high });
 
   } catch(err){
-    console.warn("Kiri:Moto 슬라이싱 실패, fallback 사용:", err);
-    return estimateFromSTLFallback(volMm3, bbox, infPct);
+    recordStlDebug({
+      source: "kiri-error",
+      error: err && err.message ? err.message : String(err)
+    });
+    return estimateFromSTLFallback(volMm3, bbox, infPct, "kiri-error");
   }
 };
 
@@ -992,7 +1014,7 @@ function parseKiriTime(gcode){
   return null;
 }
 
-function estimateFromSTLFallback(volMm3, bbox, infPct){
+function estimateFromSTLFallback(volMm3, bbox, infPct, reason){
   var volCm3 = volMm3/1000, z = bbox.z;
   var lineW = CONFIG.LINE_WIDTH, wallThick = CONFIG.WALL_COUNT * lineW;
   var tbThick = CONFIG.TOP_BOTTOM_LAYERS * CONFIG.LAYER_HEIGHT;
@@ -1007,8 +1029,46 @@ function estimateFromSTLFallback(volMm3, bbox, infPct){
     effFill = Math.min(effFill, CONFIG.SMALL_STL_MAX_EFF_FILL);
   }
   effFill = adjustShellEffFill(volCm3, bboxVolCm3, effFill);
-  return buildEstimateResult(volCm3, volCm3*effFill, z, bboxVolCm3);
+  var fallbackResult = buildEstimateResult(volCm3, volCm3*effFill, z, bboxVolCm3);
+  recordStlDebug({
+    source: "fallback-volume",
+    reason: reason || "volume",
+    filGrams: fallbackResult.filGrams,
+    printMin: fallbackResult.printMin,
+    effFill: effFill
+  });
+  return attachStlDebug(fallbackResult);
 }
+
+/* ========== DEBUG: STL 견적 엔진 확인 (배포 전 이 블록 + HTML/CSS/debug 스크립트 삭제) ========== */
+window.isStlEstimateDebug = function(){
+  try {
+    if(/(?:^|[?&])stlDebug=1(?:&|$)/.test(location.search)) return true;
+    if(localStorage.getItem("stlDebug") === "1") return true;
+  } catch(e){}
+  return false;
+};
+
+window.recordStlDebug = function(info){
+  window.__stlEstimateDebug = Object.assign(
+    { at: new Date().toISOString() },
+    window.__stlEstimateDebug || {},
+    info || {}
+  );
+  if(window.isStlEstimateDebug()){
+    console.info("[STL debug]", window.__stlEstimateDebug);
+    if(typeof window.updateStlDebugPanel === "function"){
+      window.updateStlDebugPanel();
+    }
+  }
+};
+
+window.attachStlDebug = function(result){
+  if(!window.isStlEstimateDebug()) return result;
+  result._stlDebug = Object.assign({}, window.__stlEstimateDebug);
+  return result;
+};
+/* ========== /DEBUG ========== */
 </script>
 
 <!-- ════════════════════════════════════════
@@ -1818,6 +1878,9 @@ function estimateFromSTLFallback(volMm3, bbox, infPct){
   window.showResult = function(r, extra){
     lastResult = r;
     lastExtra = extra || {};
+    if(typeof window.updateStlDebugPanel === "function"){
+      window.updateStlDebugPanel(r);
+    }
     renderResult();
   };
 
@@ -2175,5 +2238,120 @@ window.runStlEstimate = async function(){
   }, 180);
 };
 </script>
+
+<!-- ========== DEBUG: STL 견적 엔진 패널 (배포 전 이 블록 + style.css DEBUG + CONFIG DEBUG 삭제) ========== -->
+<aside id="stl-debug-panel" class="stl-debug-panel hidden" aria-label="STL 견적 엔진 디버그">
+  <div class="stl-debug-head">
+    <strong>STL 견적 디버그</strong>
+    <button type="button" class="stl-debug-close" id="stl-debug-close" aria-label="패널 숨기기">×</button>
+  </div>
+  <p class="stl-debug-hint">
+    켜기: URL에 <code>?stlDebug=1</code> · 끄기: <code>localStorage.removeItem('stlDebug')</code>
+  </p>
+  <div id="stl-debug-badge" class="stl-debug-badge stl-debug-badge--idle">대기 중</div>
+  <dl class="stl-debug-dl" id="stl-debug-dl"></dl>
+  <div class="stl-debug-actions">
+    <button type="button" class="stl-debug-btn" id="stl-debug-copy">JSON 복사</button>
+    <button type="button" class="stl-debug-btn" id="stl-debug-refresh">엔진 상태 새로고침</button>
+  </div>
+</aside>
+<script>
+(function initStlDebugPanel(){
+  if(!window.isStlEstimateDebug()) return;
+
+  var panel = document.getElementById("stl-debug-panel");
+  var badge = document.getElementById("stl-debug-badge");
+  var dl = document.getElementById("stl-debug-dl");
+  if(!panel || !badge || !dl) return;
+
+  panel.classList.remove("hidden");
+
+  var SOURCE_LABEL = {
+    "kiri": "Kiri:Moto 슬라이싱 (정상)",
+    "fallback-volume": "볼륨 추정 fallback",
+    "kiri-unavailable": "Kiri 미로드 → fallback",
+    "kiri-parse-fail": "gcode 파싱 실패 → fallback",
+    "kiri-error": "슬라이싱 오류 → fallback",
+    "slicing": "슬라이싱 진행 중…",
+    "idle": "페이지 로드"
+  };
+
+  function row(k, v){
+    return "<dt>"+k+"</dt><dd>"+(v == null || v === "" ? "—" : String(v))+"</dd>";
+  }
+
+  function setBadge(source){
+    badge.className = "stl-debug-badge";
+    if(source === "kiri"){
+      badge.classList.add("stl-debug-badge--kiri");
+      badge.textContent = "Kiri 사용";
+    } else if(source === "slicing"){
+      badge.classList.add("stl-debug-badge--busy");
+      badge.textContent = "슬라이싱 중…";
+    } else if(source && source.indexOf("fallback") >= 0 || source === "kiri-unavailable" || source === "kiri-parse-fail" || source === "kiri-error"){
+      badge.classList.add("stl-debug-badge--fallback");
+      badge.textContent = "Fallback";
+    } else {
+      badge.classList.add("stl-debug-badge--idle");
+      badge.textContent = "대기 중";
+    }
+  }
+
+  window.updateStlDebugPanel = function(result){
+    var d = (result && result._stlDebug) || window.__stlEstimateDebug || {};
+    var src = d.source || "idle";
+    setBadge(src);
+    var html = [
+      row("엔진 (kiri)", typeof kiri),
+      row("engine.js", typeof kiri !== "undefined" ? "로드됨" : "없음"),
+      row("경로", SOURCE_LABEL[src] || src),
+      row("사유", d.reason || d.message || d.error || "—"),
+      row("필라 (g)", d.filGrams != null ? Math.round(d.filGrams) : (result ? Math.round(result.filGrams) : "—")),
+      row("시간 (분)", d.printMin != null ? Math.round(d.printMin) : (result ? Math.round(result.printMin) : "—")),
+      row("필라멘트 (mm)", d.filamentMm != null ? d.filamentMm.toFixed(1) : "—"),
+      row("슬라이스 시간 (초)", d.printSec != null ? Math.round(d.printSec) : "—"),
+      row("effFill", d.effFill != null ? d.effFill.toFixed(3) : "—"),
+      row("갱신", d.at || "—")
+    ].join("");
+    dl.innerHTML = html;
+  };
+
+  document.getElementById("stl-debug-close").addEventListener("click", function(){
+    panel.classList.add("hidden");
+  });
+
+  document.getElementById("stl-debug-copy").addEventListener("click", function(){
+    var payload = {
+      page: location.href,
+      kiriType: typeof kiri,
+      debug: window.__stlEstimateDebug || null
+    };
+    var text = JSON.stringify(payload, null, 2);
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text);
+    } else {
+      prompt("복사하세요", text);
+    }
+  });
+
+  document.getElementById("stl-debug-refresh").addEventListener("click", function(){
+    recordStlDebug({
+      source: "idle",
+      kiriType: typeof kiri,
+      engineJs: typeof kiri !== "undefined"
+    });
+    updateStlDebugPanel();
+  });
+
+  recordStlDebug({
+    source: "idle",
+    kiriType: typeof kiri,
+    engineJs: typeof kiri !== "undefined"
+  });
+  updateStlDebugPanel();
+})();
+</script>
+<!-- ========== /DEBUG ========== -->
+
 </body>
 </html>

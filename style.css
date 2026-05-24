@@ -1469,3 +1469,86 @@ body.scroll-locked {
   .entry-cards { grid-template-columns: 1fr; }
   .dim-grid, .dim-grid.two-fields { grid-template-columns: 1fr; }
 }
+
+/* ========== DEBUG: STL 견적 엔진 패널 (배포 전 삭제) ========== */
+.stl-debug-panel {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 10050;
+  width: min(320px, calc(100vw - 24px));
+  max-height: min(70vh, 480px);
+  overflow: auto;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--bd);
+  background: var(--bg-card);
+  box-shadow: var(--sh-lg, 0 12px 40px rgba(15, 23, 42, 0.18));
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--tx-700);
+}
+.stl-debug-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.stl-debug-head strong { font-size: 13px; color: var(--tx-900); }
+.stl-debug-close {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--tx-500);
+  padding: 0 4px;
+}
+.stl-debug-hint {
+  margin: 0 0 8px;
+  color: var(--tx-500);
+  font-size: 11px;
+}
+.stl-debug-hint code {
+  font-size: 10px;
+  background: var(--bg-subtle);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+.stl-debug-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 11px;
+  margin-bottom: 10px;
+}
+.stl-debug-badge--idle { background: var(--bg-subtle); color: var(--tx-600); }
+.stl-debug-badge--busy { background: var(--warn-bg); color: #92400e; }
+.stl-debug-badge--kiri { background: #d1fae5; color: #065f46; }
+.stl-debug-badge--fallback { background: var(--err-bg); color: #991b1b; }
+.stl-debug-dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  margin: 0 0 10px;
+}
+.stl-debug-dl dt { color: var(--tx-500); font-weight: 500; }
+.stl-debug-dl dd { margin: 0; word-break: break-all; }
+.stl-debug-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.stl-debug-btn {
+  padding: 6px 10px;
+  font-size: 11px;
+  border-radius: 8px;
+  border: 1px solid var(--bd);
+  background: var(--bg-subtle);
+  color: var(--tx-700);
+  cursor: pointer;
+}
+.stl-debug-btn:hover { background: var(--bd-lite); }
+/* ========== /DEBUG ========== */
