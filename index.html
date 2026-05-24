@@ -12,6 +12,7 @@
 <script>
 (function(){var w=window;if(w.ChannelIO){return;}var ch=function(){ch.c(arguments);};ch.q=[];ch.c=function(args){ch.q.push(args);};w.ChannelIO=ch;function l(){if(w.ChannelIOInitialized){return;}w.ChannelIOInitialized=true;var s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";s.charset="UTF-8";var x=document.getElementsByTagName("script")[0];x.parentNode.insertBefore(s,x);}if(document.readyState==="complete"){l();}else{w.addEventListener("DOMContentLoaded",l);w.addEventListener("load",l);}})();
 </script>
+<script src="https://grid.space/code/engine.js"></script>
 <script type="importmap">
 {
   "imports": {
@@ -244,7 +245,7 @@
           <div class="rt-header">입력값 기준 예상 정보</div>
           <div class="rt-item"><span class="rt-label">추정 부피</span><span class="rt-value" id="rt-vol">—</span></div>
           <div class="rt-item"><span class="rt-label">필라멘트</span><span class="rt-value" id="rt-fil">—</span></div>
-          <div class="rt-item"><span class="rt-label">출력 시간</span><span class="rt-value" id="rt-time">—</span></div>
+          <div class="rt-item"><span class="rt-label">출력 시간 (준비 포함)</span><span class="rt-value" id="rt-time">—</span></div>
         </div>
 
       </div>
@@ -359,7 +360,7 @@
             <span>필라멘트</span><span id="fil-info">—</span>
           </div>
           <div class="order-detail-row">
-            <span>출력 시간</span><span id="time-info">—</span>
+            <span>출력 시간 (준비 포함)</span><span id="time-info">—</span>
           </div>
         </div>
       </div>
@@ -520,7 +521,7 @@
     <div class="bottom-sheet-line"><span class="bottom-sheet-line-label">출력 비용</span><span class="bottom-sheet-line-value" id="sheet-printing">—</span></div>
     <div class="bottom-sheet-line"><span class="bottom-sheet-line-label">추정 부피</span><span class="bottom-sheet-line-value" id="sheet-vol">—</span></div>
     <div class="bottom-sheet-line"><span class="bottom-sheet-line-label">필라멘트</span><span class="bottom-sheet-line-value" id="sheet-fil">—</span></div>
-    <div class="bottom-sheet-line"><span class="bottom-sheet-line-label">출력 시간</span><span class="bottom-sheet-line-value" id="sheet-time">—</span></div>
+    <div class="bottom-sheet-line"><span class="bottom-sheet-line-label">출력 시간 (준비 포함)</span><span class="bottom-sheet-line-value" id="sheet-time">—</span></div>
   </div>
   <div class="bottom-sheet-cta">
     <a class="order-btn order-btn-channel" id="sheet-inquiry" href="#" aria-label="견적 문의하기">
@@ -599,7 +600,7 @@
           <td style="padding:8px 0;color:#0F172A;font-weight:600;" id="qi-fil"></td>
         </tr>
         <tr>
-          <td style="padding:8px 0;color:#64748B;font-weight:500;">예상 출력 시간</td>
+          <td style="padding:8px 0;color:#64748B;font-weight:500;">예상 출력 시간 (준비 포함)</td>
           <td style="padding:8px 0;color:#0F172A;font-weight:600;" id="qi-time"></td>
         </tr>
       </table>
@@ -642,10 +643,45 @@ var CONFIG = {
   LAYER_HEIGHT:    0.20,
   LINE_WIDTH:      0.42,
   PRINT_SPEED:     200,
-  SPEED_EFFICIENCY:0.50,
+  /* 뱀부 대조 — 속이 빈 STL(메쉬≪바운딩박스)은 필라 과대 → compactness 분기 */
+  MATERIAL_FACTOR: 1.19,
+  MATERIAL_REF_VOL: 440,
+  MATERIAL_VOLUME_EXP: 0.14,
+  HOLLOW_COMPACTNESS_MAX: 0.38,
+  HOLLOW_MF_FLOOR: 0.76,
+  HOLLOW_MF_SLOPE: 0.28,
+  /* 얇은 쉘 STL: 메쉬 부피 대비 실제 필라 적음 (fill/compactness 낮음) */
+  SHELL_STL_EFF_FILL_MAX: 0.4,
+  SHELL_FILL_COMPACT_RATIO_MAX: 0.38,
+  SHELL_MF_OFFSET: 0.55,
+  SHELL_MF_SLOPE: 1.75,
+  SHELL_MF_VOL_REF: 250,
+  SHELL_MF_VOL_EXP: 0.08,
+  SHELL_SPEED_VOL_EXP: 0.55,
+  LARGE_SHELL_MIN_VOL_CM3: 200,
+  LARGE_SHELL_MID_VOL_CM3: 280,
+  LARGE_SHELL_MID_MIN_EFF_FILL: 0.191,
+  LARGE_SHELL_MIN_EFF_FILL: 0.19,
+  LARGE_SHELL_EFF_VOL_EXP: 0.22,
+  LARGE_SHELL_LOW_EFF_MAX: 0.18,
+  LARGE_SHELL_SPEED_PIVOT_CM3: 300,
+  /* 소형 STL: 부피 보정(REF/vol)이 과대 → MF·effFill 상한 */
+  SMALL_STL_MAX_VOL_CM3: 40,
+  SMALL_STL_MF_MAX: 0.75,
+  SMALL_STL_MAX_EFF_FILL: 0.52,
+  SMALL_STL_VOL_BOOST_CAP: 1.05,
+  SMALL_STL_SPEED_VOL_MIN: 12,
+  SMALL_STL_SPEED_SCALE_MIN: 0.68,
+  /* 바운딩 크고 fill/compactness 높음 → 필라 과소 추정 보정 */
+  DENSE_STL_MF_SCALE_LOW: 1.35,
+  DENSE_STL_SPEED_SCALE: 0.82,
+  DENSE_FILL_COMPACT_RATIO_MIN: 0.45,
+  SPEED_EFFICIENCY: 0.74,
+  SPEED_VOLUME_EXP: 0.03,
   WALL_COUNT:      2,
   TOP_BOTTOM_LAYERS:3,
-  LAYER_CHANGE_TIME:1.5,
+  LAYER_CHANGE_TIME: 1.45,
+  PRINT_PREP_MINUTES: 7,
   WALL_THICKNESS:  2.5,
   PLA_DENSITY:     1.24,
   MAX_DIM:         240,
@@ -656,6 +692,28 @@ var CONFIG = {
     premium:  { fee: 150000, label: "Premium (복잡·장식)" },
     custom:   { fee: 0,      label: "Custom (추후 협의)" },
   },
+  // Kiri:Moto P1S 프로파일 설정
+  KIRI_DEVICE: {
+    bedWidth:    256,
+    bedDepth:    256,
+    maxHeight:   256,
+    filamentSize: 1.75,
+    nozzleSize:  0.4
+  },
+  KIRI_PROCESS: {
+    sliceHeight:       0.2,
+    sliceShells:       2,
+    sliceFillAngle:    45,
+    sliceFillType:     "gyroid",
+    sliceFillSparse:   0.05,
+    sliceSupportEnable: false,
+    outputFeedrate:    200,
+    outputSeekrate:    250,
+    firstSliceHeight:  0.2
+  },
+  // Kiri:Moto → P1S 보정계수 (실측 데이터로 추후 튜닝)
+  P1S_FILAMENT_FACTOR: 1.0,
+  P1S_TIME_FACTOR:     1.0,
 };
 
 (function bootChannelTalk(){
@@ -720,47 +778,237 @@ function calcEffectiveFill(shapeKey,x,y,z,infPct){
   return pf+(1-pf)*infPct/100;
 }
 
-window.estimateManual = function(shapeKey,x,y,z,infPct){
-  var shape=SHAPES[shapeKey];
-  var volCm3=shape.volume(x,y,z);
-  var effFill=calcEffectiveFill(shapeKey,x,y,z,infPct);
-  var matCm3=volCm3*effFill, matMm3=matCm3*1000;
-  var flowRate=CONFIG.LINE_WIDTH*CONFIG.LAYER_HEIGHT*CONFIG.PRINT_SPEED*CONFIG.SPEED_EFFICIENCY;
+function getMeshCompactness(volCm3, bboxVolCm3){
+  return Math.min(1, volCm3 / Math.max(bboxVolCm3, volCm3 * 0.01));
+}
+
+function isThinShellStl(volCm3, bboxVolCm3, effFill){
+  if(effFill >= CONFIG.SHELL_STL_EFF_FILL_MAX){ return false; }
+  if(volCm3 >= CONFIG.LARGE_SHELL_MIN_VOL_CM3 && effFill < 0.3){ return true; }
+  var compactness = getMeshCompactness(volCm3, bboxVolCm3);
+  if(compactness < CONFIG.HOLLOW_COMPACTNESS_MAX){ return false; }
+  return (effFill / Math.max(compactness, 0.05)) < CONFIG.SHELL_FILL_COMPACT_RATIO_MAX;
+}
+
+function getLargeShellMinEffFill(volCm3){
+  var fill = CONFIG.LARGE_SHELL_MIN_EFF_FILL * Math.pow(
+    CONFIG.LARGE_SHELL_MIN_VOL_CM3 / volCm3,
+    CONFIG.LARGE_SHELL_EFF_VOL_EXP
+  );
+  if(volCm3 < CONFIG.LARGE_SHELL_MID_VOL_CM3){
+    return Math.max(fill, CONFIG.LARGE_SHELL_MID_MIN_EFF_FILL);
+  }
+  return fill;
+}
+
+function adjustShellEffFill(volCm3, bboxVolCm3, effFill){
+  if(volCm3 >= CONFIG.LARGE_SHELL_MIN_VOL_CM3
+      && effFill < CONFIG.LARGE_SHELL_LOW_EFF_MAX
+      && isThinShellStl(volCm3, bboxVolCm3, effFill)){
+    return Math.max(effFill, getLargeShellMinEffFill(volCm3));
+  }
+  return effFill;
+}
+
+function isDenseStl(volCm3, bboxVolCm3, effFill){
+  if(isThinShellStl(volCm3, bboxVolCm3, effFill)){ return false; }
+  if(effFill >= CONFIG.SHELL_STL_EFF_FILL_MAX){ return false; }
+  var compactness = getMeshCompactness(volCm3, bboxVolCm3);
+  var ratio = effFill / Math.max(compactness, 0.05);
+  return ratio >= 0.65
+    && ratio < 1.15
+    && compactness < CONFIG.HOLLOW_COMPACTNESS_MAX;
+}
+
+function getThinShellMaterialFactor(volCm3, effFill){
+  var mf = CONFIG.SHELL_MF_OFFSET + CONFIG.SHELL_MF_SLOPE * effFill;
+  if(volCm3 > CONFIG.SHELL_MF_VOL_REF){
+    mf *= Math.pow(CONFIG.SHELL_MF_VOL_REF / volCm3, CONFIG.SHELL_MF_VOL_EXP);
+  }
+  return mf;
+}
+
+function getSmallStlSpeedScale(volCm3){
+  if(volCm3 > CONFIG.SMALL_STL_MAX_VOL_CM3){ return 1; }
+  var volMin = CONFIG.SMALL_STL_SPEED_VOL_MIN;
+  var scaleMin = CONFIG.SMALL_STL_SPEED_SCALE_MIN;
+  if(volCm3 <= volMin){ return scaleMin; }
+  return scaleMin + (volCm3 - volMin) / (CONFIG.SMALL_STL_MAX_VOL_CM3 - volMin) * (1 - scaleMin);
+}
+
+function capSmallStlMaterialFactor(volCm3, mf){
+  if(volCm3 > CONFIG.SMALL_STL_MAX_VOL_CM3){ return mf; }
+  var volBoost = CONFIG.MATERIAL_FACTOR * Math.min(
+    Math.pow(CONFIG.MATERIAL_REF_VOL / Math.max(volCm3, 1), CONFIG.MATERIAL_VOLUME_EXP),
+    CONFIG.SMALL_STL_VOL_BOOST_CAP
+  );
+  return Math.min(mf, volBoost, CONFIG.SMALL_STL_MF_MAX);
+}
+
+function getMaterialFactor(volCm3, bboxVolCm3, effFillRatio){
+  var compactness = getMeshCompactness(volCm3, bboxVolCm3);
+  var fill = effFillRatio != null ? effFillRatio : 0.25;
+  var mf;
+  if(isThinShellStl(volCm3, bboxVolCm3, fill)){
+    mf = getThinShellMaterialFactor(volCm3, fill);
+  } else if(compactness < CONFIG.HOLLOW_COMPACTNESS_MAX){
+    mf = CONFIG.MATERIAL_FACTOR * (
+      CONFIG.HOLLOW_MF_FLOOR + CONFIG.HOLLOW_MF_SLOPE * compactness
+    );
+  } else {
+    mf = CONFIG.MATERIAL_FACTOR * Math.pow(
+      CONFIG.MATERIAL_REF_VOL / Math.max(volCm3, 30),
+      CONFIG.MATERIAL_VOLUME_EXP
+    );
+  }
+  if(isDenseStl(volCm3, bboxVolCm3, fill)){
+    mf *= CONFIG.DENSE_STL_MF_SCALE_LOW;
+  }
+  return capSmallStlMaterialFactor(volCm3, mf);
+}
+
+function getSpeedEfficiency(volCm3, bboxVolCm3, effFillRatio){
+  var se = CONFIG.SPEED_EFFICIENCY * Math.pow(
+    Math.max(volCm3, 30) / CONFIG.MATERIAL_REF_VOL,
+    CONFIG.SPEED_VOLUME_EXP
+  );
+  if(volCm3 <= CONFIG.SMALL_STL_MAX_VOL_CM3){
+    se *= getSmallStlSpeedScale(volCm3);
+  } else if(bboxVolCm3 != null && effFillRatio != null){
+    var fill = effFillRatio;
+    if(isThinShellStl(volCm3, bboxVolCm3, fill) && volCm3 > CONFIG.SHELL_MF_VOL_REF){
+      if(volCm3 >= CONFIG.LARGE_SHELL_SPEED_PIVOT_CM3){
+        se *= Math.pow(CONFIG.MATERIAL_REF_VOL / volCm3, CONFIG.SHELL_SPEED_VOL_EXP);
+      } else {
+        se *= Math.pow(volCm3 / CONFIG.MATERIAL_REF_VOL, CONFIG.SHELL_SPEED_VOL_EXP);
+      }
+    } else if(isDenseStl(volCm3, bboxVolCm3, fill)){
+      se *= CONFIG.DENSE_STL_SPEED_SCALE;
+    }
+  }
+  return se;
+}
+
+function buildEstimateResult(volCm3, matCm3Raw, heightMm, bboxVolCm3){
+  var bboxVol=bboxVolCm3 || volCm3 / 0.55;
+  var effFillRatio=matCm3Raw/volCm3;
+  var matCm3=matCm3Raw*getMaterialFactor(volCm3, bboxVol, effFillRatio);
+  var matMm3=matCm3*1000;
+  var flowRate=CONFIG.LINE_WIDTH*CONFIG.LAYER_HEIGHT*CONFIG.PRINT_SPEED*getSpeedEfficiency(volCm3, bboxVol, effFillRatio);
   var extrudeSec=matMm3/flowRate;
-  var numLayers=Math.ceil(z/CONFIG.LAYER_HEIGHT);
+  var numLayers=Math.ceil(heightMm/CONFIG.LAYER_HEIGHT);
   var layerSec=numLayers*CONFIG.LAYER_CHANGE_TIME;
-  var totalMin=(extrudeSec+layerSec)/60;
+  var modelPrintMin=(extrudeSec+layerSec)/60;
+  var totalMin=modelPrintMin+CONFIG.PRINT_PREP_MINUTES;
   var materialCost=matCm3*CONFIG.FILAMENT_RATE;
   var machineCost=(totalMin/60)*CONFIG.MACHINE_RATE;
   var subtotal=Math.max(materialCost+machineCost, CONFIG.MIN_PRICE);
   var low=Math.max(ceil(subtotal*(1-CONFIG.RANGE),1000), CONFIG.MIN_PRICE);
   var high=ceil(subtotal*(1+CONFIG.RANGE),1000);
   return {volCm3:volCm3,matCm3:matCm3,filGrams:matCm3*CONFIG.PLA_DENSITY,printMin:totalMin,low:low,high:high};
+}
+
+window.estimateManual = function(shapeKey,x,y,z,infPct){
+  var shape=SHAPES[shapeKey];
+  var volCm3=shape.volume(x,y,z);
+  var effFill=calcEffectiveFill(shapeKey,x,y,z,infPct);
+  return buildEstimateResult(volCm3, volCm3*effFill, z);
 };
 
-window.estimateFromSTL = function(volMm3,bbox,infPct){
-  var volCm3=volMm3/1000, z=bbox.z;
-  var lineW=CONFIG.LINE_WIDTH, wallThick=CONFIG.WALL_COUNT*lineW;
-  var tbThick=CONFIG.TOP_BOTTOM_LAYERS*CONFIG.LAYER_HEIGHT;
-  var surfaceArea=2*(bbox.x*bbox.y+bbox.x*bbox.z+bbox.y*bbox.z);
-  var boundingVol=bbox.x*bbox.y*bbox.z;
-  var wf=Math.min(1,surfaceArea*wallThick/boundingVol);
-  var tf=Math.min(1,2*tbThick/z);
-  var sf=Math.min(1,wf+tf);
-  var effFill=sf+(1-sf)*infPct/100;
-  var matCm3=volCm3*effFill, matMm3=matCm3*1000;
-  var flowRate=CONFIG.LINE_WIDTH*CONFIG.LAYER_HEIGHT*CONFIG.PRINT_SPEED*CONFIG.SPEED_EFFICIENCY;
-  var extrudeSec=matMm3/flowRate;
-  var numLayers=Math.ceil(z/CONFIG.LAYER_HEIGHT);
-  var layerSec=numLayers*CONFIG.LAYER_CHANGE_TIME;
-  var totalMin=(extrudeSec+layerSec)/60;
-  var matCost=matCm3*CONFIG.FILAMENT_RATE;
-  var macCost=(totalMin/60)*CONFIG.MACHINE_RATE;
-  var subtotal=Math.max(matCost+macCost, CONFIG.MIN_PRICE);
-  var low=Math.max(ceil(subtotal*(1-CONFIG.RANGE),1000), CONFIG.MIN_PRICE);
-  var high=ceil(subtotal*(1+CONFIG.RANGE),1000);
-  return {volCm3:volCm3,matCm3:matCm3,filGrams:matCm3*CONFIG.PLA_DENSITY,printMin:totalMin,low:low,high:high};
+window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct){
+  var volCm3 = volMm3 / 1000;
+
+  if(!stlArrayBuffer || typeof kiri === 'undefined'){
+    return estimateFromSTLFallback(volMm3, bbox, infPct);
+  }
+
+  try {
+    var engine = kiri.newEngine();
+    engine.setRender(false);
+
+    var process = Object.assign({}, CONFIG.KIRI_PROCESS, {
+      sliceFillSparse: infPct / 100
+    });
+
+    engine.setMode("FDM");
+    engine.setDevice(CONFIG.KIRI_DEVICE);
+    engine.setProcess(process);
+
+    await engine.parse(stlArrayBuffer);
+
+    await engine.slice();
+    await engine.prepare();
+    var gcode = await engine.export();
+
+    var filamentMm = parseKiriFilament(gcode);
+    var printSec   = parseKiriTime(gcode);
+
+    if(!filamentMm || !printSec){
+      console.warn("Kiri:Moto gcode 파싱 실패, fallback 사용");
+      return estimateFromSTLFallback(volMm3, bbox, infPct);
+    }
+
+    var filamentCm3 = filamentMm * Math.PI * Math.pow(1.75/2/10, 2);
+
+    var matCm3   = filamentCm3 * CONFIG.P1S_FILAMENT_FACTOR;
+    var filGrams = matCm3 * CONFIG.PLA_DENSITY;
+    var totalMin = (printSec / 60) * CONFIG.P1S_TIME_FACTOR + CONFIG.PRINT_PREP_MINUTES;
+
+    var materialCost = matCm3 * CONFIG.FILAMENT_RATE;
+    var machineCost  = (totalMin / 60) * CONFIG.MACHINE_RATE;
+    var subtotal     = Math.max(materialCost + machineCost, CONFIG.MIN_PRICE);
+    var low  = Math.max(Math.ceil(subtotal * (1 - CONFIG.RANGE) / 1000) * 1000, CONFIG.MIN_PRICE);
+    var high = Math.ceil(subtotal * (1 + CONFIG.RANGE) / 1000) * 1000;
+
+    return { volCm3, matCm3, filGrams, printMin: totalMin, low, high };
+
+  } catch(err){
+    console.warn("Kiri:Moto 슬라이싱 실패, fallback 사용:", err);
+    return estimateFromSTLFallback(volMm3, bbox, infPct);
+  }
 };
+
+function parseKiriFilament(gcode){
+  var match = gcode.match(/;\s*filament used[^\d]*([\d.]+)\s*mm/i);
+  if(match) return parseFloat(match[1]);
+  match = gcode.match(/;\s*plastic used[^\d]*([\d.]+)\s*mm/i);
+  if(match) return parseFloat(match[1]);
+  return null;
+}
+
+function parseKiriTime(gcode){
+  var match = gcode.match(/;\s*(?:print|estimated)\s*time[^0-9]*(\d+)h\s*(\d+)m\s*(\d+)s/i);
+  if(match){
+    return parseInt(match[1])*3600 + parseInt(match[2])*60 + parseInt(match[3]);
+  }
+  match = gcode.match(/;\s*(?:print|estimated)\s*time[^0-9]*(\d+):(\d+):(\d+)/i);
+  if(match){
+    return parseInt(match[1])*3600 + parseInt(match[2])*60 + parseInt(match[3]);
+  }
+  match = gcode.match(/;\s*(?:print|estimated)\s*time[^0-9]*(\d+)m\s*(\d+)s/i);
+  if(match){
+    return parseInt(match[1])*60 + parseInt(match[2]);
+  }
+  return null;
+}
+
+function estimateFromSTLFallback(volMm3, bbox, infPct){
+  var volCm3 = volMm3/1000, z = bbox.z;
+  var lineW = CONFIG.LINE_WIDTH, wallThick = CONFIG.WALL_COUNT * lineW;
+  var tbThick = CONFIG.TOP_BOTTOM_LAYERS * CONFIG.LAYER_HEIGHT;
+  var surfaceArea = 2*(bbox.x*bbox.y + bbox.x*bbox.z + bbox.y*bbox.z);
+  var boundingVol = bbox.x*bbox.y*bbox.z;
+  var bboxVolCm3  = boundingVol/1000;
+  var wf = Math.min(1, surfaceArea*wallThick/boundingVol);
+  var tf = Math.min(1, 2*tbThick/z);
+  var sf = Math.min(1, wf+tf);
+  var effFill = sf+(1-sf)*infPct/100;
+  if(volCm3 <= CONFIG.SMALL_STL_MAX_VOL_CM3){
+    effFill = Math.min(effFill, CONFIG.SMALL_STL_MAX_EFF_FILL);
+  }
+  effFill = adjustShellEffFill(volCm3, bboxVolCm3, effFill);
+  return buildEstimateResult(volCm3, volCm3*effFill, z, bboxVolCm3);
+}
 </script>
 
 <!-- ════════════════════════════════════════
@@ -868,7 +1116,7 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
 
     lines.push("- 추정 부피: "+r.volCm3.toFixed(1)+" cm³");
     lines.push("- 필라멘트: "+Math.round(r.filGrams)+"g");
-    lines.push("- 예상 출력 시간: "+formatTime(r.printMin));
+    lines.push("- 예상 출력 시간 (준비 포함): "+formatTime(r.printMin));
 
     if(needsModeling){ lines.push("- 모델링 비용: "+fmt(mc.fee)+"원"); }
     else if(isCustom){ lines.push("- 모델링 비용: 추후 협의"); }
@@ -1392,7 +1640,7 @@ window.estimateFromSTL = function(volMm3,bbox,infPct){
           "- 채움율: "+FIXED_INFILL+"%\n"+
           "- 추정 부피: "+r.volCm3.toFixed(1)+" cm³\n"+
           "- 필라멘트: "+Math.round(r.filGrams)+"g\n"+
-          "- 예상 출력 시간: "+formatTime(r.printMin)+"\n"+
+          "- 예상 출력 시간 (준비 포함): "+formatTime(r.printMin)+"\n"+
           "- 예상 견적: "+fmt(r.low)+"원 ~ "+fmt(r.high)+"원\n\n상세 상담 부탁드립니다."
       });
     }, { scrollAfter: true });
@@ -1735,7 +1983,7 @@ const resetBtn     = $("#viewer-reset-btn");
 const FIXED_INFILL = 5;
 
 let scene, camera, renderer, controls, meshObj;
-let stlVolumeMm3 = 0, stlBbox = null;
+let stlVolumeMm3 = 0, stlBbox = null, stlArrayBuffer = null;
 let initCamPos = null;
 
 function initViewer(){
@@ -1796,6 +2044,19 @@ function computeVolumeMm3(geometry){
   return Math.abs(sum);
 }
 
+function computeSurfaceAreaMm2(geometry){
+  const pos=geometry.attributes.position;
+  const vA=new THREE.Vector3(), vB=new THREE.Vector3(), vC=new THREE.Vector3();
+  let area=0;
+  for(let i=0;i<pos.count;i+=3){
+    vA.fromBufferAttribute(pos,i); vB.fromBufferAttribute(pos,i+1); vC.fromBufferAttribute(pos,i+2);
+    const ab=new THREE.Vector3().subVectors(vB, vA);
+    const ac=new THREE.Vector3().subVectors(vC, vA);
+    area += ab.cross(ac).length()/2;
+  }
+  return area;
+}
+
 function loadSTL(arrayBuffer, filename){
   initViewer();
   viewerWrap.classList.remove("hidden");
@@ -1843,7 +2104,7 @@ function clearSTL(){
   fileInfo.classList.add("hidden");
   filenameEl.textContent = "";
   viewerInfoEl.textContent = "";
-  stlVolumeMm3=0; stlBbox=null; fileInput.value="";
+  stlVolumeMm3=0; stlBbox=null; stlArrayBuffer=null; fileInput.value="";
   document.querySelector("#side-panel").classList.remove("has-result");
   if(window.updateEstimateBreadcrumb) window.updateEstimateBreadcrumb();
   document.querySelector("#side-placeholder").style.display="";
@@ -1873,11 +2134,14 @@ removeBtn.addEventListener("click", clearSTL);
 
 function handleFile(file){
   const reader = new FileReader();
-  reader.onload = ()=>loadSTL(reader.result, file.name);
+  reader.onload = ()=>{
+    stlArrayBuffer = reader.result;
+    loadSTL(reader.result, file.name);
+  };
   reader.readAsArrayBuffer(file);
 }
 
-window.runStlEstimate = function(){
+window.runStlEstimate = async function(){
   if(!stlVolumeMm3||!stlBbox){
     window.showGuideToast("STL 파일을 업로드해 주세요.");
     return;
@@ -1900,8 +2164,8 @@ window.runStlEstimate = function(){
     if(i<steps.length){ bar.style.width=steps[i].pct+"%"; stepEl.textContent=steps[i].text; i++; }
     else {
       clearInterval(iv);
-      window.finishEstimateLoading(function(){
-        const r = window.estimateFromSTL(stlVolumeMm3, stlBbox, FIXED_INFILL);
+      window.finishEstimateLoading(async function(){
+        const r = await window.estimateFromSTL(stlVolumeMm3, stlBbox, stlArrayBuffer, FIXED_INFILL);
         window.showResult(r,{
           bbox: stlBbox,
           fileName: filenameEl.textContent
