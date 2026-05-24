@@ -14,12 +14,12 @@
 <script>
 (function(){var w=window;if(w.ChannelIO){return;}var ch=function(){ch.c(arguments);};ch.q=[];ch.c=function(args){ch.q.push(args);};w.ChannelIO=ch;function l(){if(w.ChannelIOInitialized){return;}w.ChannelIOInitialized=true;var s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";s.charset="UTF-8";var x=document.getElementsByTagName("script")[0];x.parentNode.insertBefore(s,x);}if(document.readyState==="complete"){l();}else{w.addEventListener("DOMContentLoaded",l);w.addEventListener("load",l);}})();
 </script>
-<script src="https://grid.space/code/engine.js"></script>
 <script type="importmap">
 {
   "imports": {
     "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+    "kiri-engine": "https://grid.space/lib/kiri/run/engine.js"
   }
 }
 </script>
@@ -716,6 +716,9 @@ var CONFIG = {
   // Kiri:Moto → P1S 보정계수 (실측 데이터로 추후 튜닝)
   P1S_FILAMENT_FACTOR: 1.0,
   P1S_TIME_FACTOR:     1.0,
+  KIRI_ENGINE_MODULE:  "https://grid.space/lib/kiri/run/engine.js",
+  KIRI_WORKER_URL:     "https://grid.space/lib/kiri/run/worker.js",
+  KIRI_POOL_URL:       "https://grid.space/lib/kiri/run/minion.js",
 };
 
 (function bootChannelTalk(){
@@ -917,14 +920,41 @@ window.estimateManual = function(shapeKey,x,y,z,infPct){
   return buildEstimateResult(volCm3, volCm3*effFill, z);
 };
 
+window.ensureKiriEngine = function(){
+  if(typeof window.kiriNewEngine === "function"){
+    return Promise.resolve(window.kiriNewEngine);
+  }
+  if(!window.__kiriEnginePromise){
+    window.__kiriEnginePromise = import(CONFIG.KIRI_ENGINE_MODULE).then(function(mod){
+      window.kiriNewEngine = function(){
+        return mod.newEngine({
+          workURL: CONFIG.KIRI_WORKER_URL,
+          poolURL: CONFIG.KIRI_POOL_URL
+        });
+      };
+      return window.kiriNewEngine;
+    }).catch(function(err){
+      window.__kiriEnginePromise = null;
+      throw err;
+    });
+  }
+  return window.__kiriEnginePromise;
+};
+
 window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct){
   var volCm3 = volMm3 / 1000;
 
-  if(!stlArrayBuffer || typeof kiri === 'undefined'){
+  if(!stlArrayBuffer){
+    recordStlDebug({ source: "kiri-unavailable", hasStl: false });
+    return estimateFromSTLFallback(volMm3, bbox, infPct, "kiri-unavailable");
+  }
+
+  try {
+    await window.ensureKiriEngine();
+  } catch(loadErr){
     recordStlDebug({
       source: "kiri-unavailable",
-      kiriType: typeof kiri,
-      hasStl: !!stlArrayBuffer
+      error: loadErr && loadErr.message ? loadErr.message : String(loadErr)
     });
     return estimateFromSTLFallback(volMm3, bbox, infPct, "kiri-unavailable");
   }
@@ -932,7 +962,7 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct){
   try {
     recordStlDebug({ source: "slicing", message: "Kiri 슬라이싱 중…" });
 
-    var engine = kiri.newEngine();
+    var engine = window.kiriNewEngine();
     engine.setRender(false);
 
     var process = Object.assign({}, CONFIG.KIRI_PROCESS, {
@@ -991,26 +1021,34 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct){
 };
 
 function parseKiriFilament(gcode){
-  var match = gcode.match(/;\s*filament used[^\d]*([\d.]+)\s*mm/i);
-  if(match) return parseFloat(match[1]);
-  match = gcode.match(/;\s*plastic used[^\d]*([\d.]+)\s*mm/i);
-  if(match) return parseFloat(match[1]);
+  var patterns = [
+    /;\s*filament used[^\d]*([\d.]+)\s*mm/i,
+    /;\s*plastic used[^\d]*([\d.]+)\s*mm/i,
+    /;\s*total filament[^\d]*([\d.]+)\s*mm/i,
+    /filament[^;\n]*?([\d.]+)\s*mm/i
+  ];
+  for(var i = 0; i < patterns.length; i++){
+    var match = gcode.match(patterns[i]);
+    if(match) return parseFloat(match[1]);
+  }
   return null;
 }
 
 function parseKiriTime(gcode){
-  var match = gcode.match(/;\s*(?:print|estimated)\s*time[^0-9]*(\d+)h\s*(\d+)m\s*(\d+)s/i);
+  var match = gcode.match(/;\s*(?:print|estimated|total)\s*time[^0-9]*(\d+)h\s*(\d+)m\s*(\d+)s/i);
   if(match){
-    return parseInt(match[1])*3600 + parseInt(match[2])*60 + parseInt(match[3]);
+    return parseInt(match[1], 10)*3600 + parseInt(match[2], 10)*60 + parseInt(match[3], 10);
   }
-  match = gcode.match(/;\s*(?:print|estimated)\s*time[^0-9]*(\d+):(\d+):(\d+)/i);
+  match = gcode.match(/;\s*(?:print|estimated|total)\s*time[^0-9]*(\d+):(\d+):(\d+)/i);
   if(match){
-    return parseInt(match[1])*3600 + parseInt(match[2])*60 + parseInt(match[3]);
+    return parseInt(match[1], 10)*3600 + parseInt(match[2], 10)*60 + parseInt(match[3], 10);
   }
-  match = gcode.match(/;\s*(?:print|estimated)\s*time[^0-9]*(\d+)m\s*(\d+)s/i);
+  match = gcode.match(/;\s*(?:print|estimated|total)\s*time[^0-9]*(\d+)m\s*(\d+)s/i);
   if(match){
-    return parseInt(match[1])*60 + parseInt(match[2]);
+    return parseInt(match[1], 10)*60 + parseInt(match[2], 10);
   }
+  match = gcode.match(/;\s*time\s*[=:]\s*(\d+)/i);
+  if(match) return parseInt(match[1], 10);
   return null;
 }
 
@@ -2302,8 +2340,8 @@ window.runStlEstimate = async function(){
     var src = d.source || "idle";
     setBadge(src);
     var html = [
-      row("엔진 (kiri)", typeof kiri),
-      row("engine.js", typeof kiri !== "undefined" ? "로드됨" : "없음"),
+      row("엔진 (kiriNewEngine)", typeof window.kiriNewEngine),
+      row("engine 모듈", typeof window.kiriNewEngine === "function" ? "로드됨" : "없음"),
       row("경로", SOURCE_LABEL[src] || src),
       row("사유", d.reason || d.message || d.error || "—"),
       row("필라 (g)", d.filGrams != null ? Math.round(d.filGrams) : (result ? Math.round(result.filGrams) : "—")),
@@ -2323,7 +2361,7 @@ window.runStlEstimate = async function(){
   document.getElementById("stl-debug-copy").addEventListener("click", function(){
     var payload = {
       page: location.href,
-      kiriType: typeof kiri,
+      kiriNewEngine: typeof window.kiriNewEngine,
       debug: window.__stlEstimateDebug || null
     };
     var text = JSON.stringify(payload, null, 2);
@@ -2335,18 +2373,35 @@ window.runStlEstimate = async function(){
   });
 
   document.getElementById("stl-debug-refresh").addEventListener("click", function(){
-    recordStlDebug({
-      source: "idle",
-      kiriType: typeof kiri,
-      engineJs: typeof kiri !== "undefined"
+    window.ensureKiriEngine().then(function(){
+      recordStlDebug({
+        source: "idle",
+        kiriNewEngine: typeof window.kiriNewEngine,
+        engineModule: "loaded"
+      });
+      updateStlDebugPanel();
+    }).catch(function(err){
+      recordStlDebug({
+        source: "kiri-unavailable",
+        error: err && err.message ? err.message : String(err)
+      });
+      updateStlDebugPanel();
     });
-    updateStlDebugPanel();
   });
 
-  recordStlDebug({
-    source: "idle",
-    kiriType: typeof kiri,
-    engineJs: typeof kiri !== "undefined"
+  window.ensureKiriEngine().then(function(){
+    recordStlDebug({
+      source: "idle",
+      kiriNewEngine: typeof window.kiriNewEngine,
+      engineModule: "loaded"
+    });
+    updateStlDebugPanel();
+  }).catch(function(err){
+    recordStlDebug({
+      source: "kiri-unavailable",
+      error: err && err.message ? err.message : String(err)
+    });
+    updateStlDebugPanel();
   });
   updateStlDebugPanel();
 })();
