@@ -736,8 +736,8 @@ var CONFIG = {
   // slice 워커가 첫 응답을 주지 않으면 브라우저/워커 환경 문제로 보고 fallback 견적을 낸다
   KIRI_SLICE_NO_REPLY_TIMEOUT_MS: 25000,
   // Kiri:Moto → P1S 보정계수 (실측 데이터로 추후 튜닝)
-  P1S_FILAMENT_FACTOR: 1.0,
-  P1S_TIME_FACTOR:     1.0,
+  P1S_FILAMENT_FACTOR: 0.90,
+  P1S_TIME_FACTOR:     0.36,
   KIRI_ENGINE_MODULE:  "https://grid.space/lib/kiri/run/engine.js",
   KIRI_WORKER_URL:     "./lib/kiri/worker.js",
   KIRI_POOL_URL:       "./lib/kiri/minion.js",
