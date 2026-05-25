@@ -1156,7 +1156,9 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct, on
       return estimateFromSTLFallback(volMm3, bbox, infPct, "kiri-parse-fail");
     }
 
-    var filamentCm3 = filamentMm * Math.PI * Math.pow(1.75/2/10, 2);
+    // filamentMm: 압출 길이(mm), 직경 1.75mm → 반지름 0.875mm
+    // mm³ → cm³ 변환: /1000
+    var filamentCm3 = filamentMm * Math.PI * Math.pow(0.875, 2) / 1000;
 
     var matCm3   = filamentCm3 * CONFIG.P1S_FILAMENT_FACTOR;
     var filGrams = matCm3 * CONFIG.PLA_DENSITY;
