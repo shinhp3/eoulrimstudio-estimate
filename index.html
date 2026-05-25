@@ -919,13 +919,15 @@ function getSpeedEfficiency(volCm3, bboxVolCm3, effFillRatio){
 function buildEstimateResult(volCm3, matCm3Raw, heightMm, bboxVolCm3){
   var bboxVol=bboxVolCm3 || volCm3 / 0.55;
   var effFillRatio=matCm3Raw/volCm3;
-  var matCm3=matCm3Raw*getMaterialFactor(volCm3, bboxVol, effFillRatio);
+  // 필라멘트: 15% 상향 보정 (실제 견적보다 여유있게 표시)
+  var matCm3=matCm3Raw*getMaterialFactor(volCm3, bboxVol, effFillRatio)*1.15;
   var matMm3=matCm3*1000;
   var flowRate=CONFIG.LINE_WIDTH*CONFIG.LAYER_HEIGHT*CONFIG.PRINT_SPEED*getSpeedEfficiency(volCm3, bboxVol, effFillRatio);
   var extrudeSec=matMm3/flowRate;
   var numLayers=Math.ceil(heightMm/CONFIG.LAYER_HEIGHT);
   var layerSec=numLayers*CONFIG.LAYER_CHANGE_TIME;
-  var modelPrintMin=(extrudeSec+layerSec)/60;
+  // 시간: P1S 보정계수 적용 (STL 견적과 일관성)
+  var modelPrintMin=(extrudeSec+layerSec)/60*CONFIG.P1S_TIME_FACTOR;
   var totalMin=modelPrintMin+CONFIG.PRINT_PREP_MINUTES;
   var materialCost=matCm3*CONFIG.FILAMENT_RATE;
   var machineCost=(totalMin/60)*CONFIG.MACHINE_RATE;
