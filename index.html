@@ -732,6 +732,8 @@ var CONFIG = {
   KIRI_SLICE_TIMEOUT_MS: 120000,
   // GitHub Pages + cross-origin worker 환경에서는 minion 병렬 워커가 응답을 멈추는 경우가 있어 기본 비활성화
   KIRI_THREADED: false,
+  // slice 워커가 첫 응답을 주지 않으면 브라우저/워커 환경 문제로 보고 fallback 견적을 낸다
+  KIRI_SLICE_NO_REPLY_TIMEOUT_MS: 25000,
   // Kiri:Moto → P1S 보정계수 (실측 데이터로 추후 튜닝)
   P1S_FILAMENT_FACTOR: 1.0,
   P1S_TIME_FACTOR:     1.0,
@@ -994,11 +996,46 @@ function withKiriTimeout(promise, label){
   ]);
 }
 
+function withKiriNoReplyGuard(promise, label, onHeartbeat){
+  var ms = CONFIG.KIRI_SLICE_NO_REPLY_TIMEOUT_MS || 25000;
+  var start = Date.now();
+  var lastBeat = 0;
+  var replySeen = false;
+  return new Promise(function(resolve, reject){
+    var timer = setInterval(function(){
+      var now = Date.now();
+      var elapsed = now - start;
+      if(!replySeen && window.__kiriLastProgressAt && window.__kiriLastProgressAt >= start){
+        replySeen = true;
+        clearInterval(timer);
+        timer = null;
+        return;
+      }
+      if(!replySeen && onHeartbeat && now - lastBeat >= 3000){
+        lastBeat = now;
+        onHeartbeat(elapsed);
+      }
+      if(!replySeen && elapsed >= ms){
+        if(timer) clearInterval(timer);
+        reject(new Error(label + " 응답 없음 (" + Math.round(ms / 1000) + "s 초과)"));
+      }
+    }, 1000);
+    promise.then(function(value){
+      if(timer) clearInterval(timer);
+      resolve(value);
+    }).catch(function(err){
+      if(timer) clearInterval(timer);
+      reject(err);
+    });
+  });
+}
+
 window.createKiriEngine = async function(){
   await window.ensureKiriEngine();
   var engine = window.kiriNewEngine();
   engine.setController({ threaded: CONFIG.KIRI_THREADED === true });
   engine.setListener(function(msg){
+    window.__kiriLastProgressAt = Date.now();
     var note = kiriProgressMessage(msg);
     if(window.isStlEstimateDebug && window.isStlEstimateDebug()){
       recordStlDebug({ source: "slicing", message: note });
@@ -1082,7 +1119,21 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct, on
 
     recordStlDebug({ source: "slicing", message: "레이어 슬라이싱…" });
     prog(30, "레이어 슬라이싱 중");
-    await withKiriTimeout(engine.slice(), "슬라이싱");
+    window.__kiriLastProgressAt = 0;
+    await withKiriTimeout(withKiriNoReplyGuard(
+      engine.slice(),
+      "슬라이싱 워커",
+      function(elapsed){
+        var sec = Math.max(1, Math.round(elapsed / 1000));
+        var msg = "슬라이싱 워커 응답 대기 중 · " + sec + "초";
+        recordStlDebug({
+          source: "slicing",
+          message: msg,
+          threaded: CONFIG.KIRI_THREADED === true
+        });
+        prog(Math.min(39, 30 + sec * 0.3), msg);
+      }
+    ), "슬라이싱");
 
     recordStlDebug({ source: "slicing", message: "경로 생성…" });
     prog(52, "경로 생성 중");
