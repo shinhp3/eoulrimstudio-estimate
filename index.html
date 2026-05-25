@@ -1145,12 +1145,13 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct, on
     prog(88, "gcode 생성 중");
     var gcode = await withKiriTimeout(engine.export(), "gcode 생성");
 
-    // 임시 디버그: gcode 주석 라인 전체 출력
-    var gcodeComments = gcode.split('\n')
+    // 임시 디버그: gcode 끝부분 주석 라인 출력 (필라멘트/시간은 끝에 있음)
+    var gcodeLines = gcode.split('\n');
+    var gcodeEndComments = gcodeLines
       .filter(function(l){ return l.trim().startsWith(';'); })
-      .slice(0, 80)
+      .slice(-40)
       .join('\n');
-    console.log('[Kiri gcode comments]\n' + gcodeComments);
+    console.log('[Kiri gcode end comments]\n' + gcodeEndComments);
 
     var filamentMm = parseKiriFilament(gcode);
     var printSec   = parseKiriTime(gcode);
