@@ -18,8 +18,7 @@
 {
   "imports": {
     "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-    "kiri-engine": "https://grid.space/lib/kiri/run/engine.js"
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
   }
 }
 </script>
@@ -716,18 +715,20 @@ var CONFIG = {
     }]
   },
   KIRI_PROCESS: {
-    sliceHeight:       0.2,
-    sliceShells:       2,
-    sliceFillAngle:    45,
-    /* 견적 속도: hex 기본값 (gyroid보다 빠름) */
-    sliceFillType:     "hex",
-    sliceFillSparse:   0.05,
+    sliceHeight:        0.2,
+    firstSliceHeight:   0.2,
+    sliceShells:        2,
+    sliceTopLayers:     5,
+    sliceBottomLayers:  3,
+    sliceFillAngle:     45,
+    sliceFillType:      "grid",
+    sliceFillSparse:    0.05,
     sliceSupportEnable: false,
-    sliceAdaptive:     false,
-    detectThinWalls:   false,
-    outputFeedrate:    200,
-    outputSeekrate:    250,
-    firstSliceHeight:  0.2
+    sliceAdaptive:      false,
+    detectThinWalls:    false,
+    outputFeedrate:     12000,
+    outputSeekrate:     30000,
+    firstLayerRate:     3000
   },
   KIRI_SLICE_TIMEOUT_MS: 120000,
   // GitHub Pages + cross-origin worker 환경에서는 minion 병렬 워커가 응답을 멈추는 경우가 있어 기본 비활성화
@@ -1111,11 +1112,12 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct, on
       sliceFillSparse: infPct / 100
     });
 
+    engine.setMode("FDM");
+    engine.setDevice(CONFIG.KIRI_DEVICE);
+    engine.setProcess(process);
+
     prog(18, "모델 파싱 중");
     await withKiriTimeout(engine.parse(stlArrayBuffer), "STL 파싱");
-
-    engine.setProcess(process);
-    engine.setDevice(CONFIG.KIRI_DEVICE);
 
     recordStlDebug({ source: "slicing", message: "레이어 슬라이싱…" });
     prog(30, "레이어 슬라이싱 중");
