@@ -1145,14 +1145,6 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct, on
     prog(88, "gcode 생성 중");
     var gcode = await withKiriTimeout(engine.export(), "gcode 생성");
 
-    // 임시 디버그: gcode 끝부분 주석 라인 출력 (필라멘트/시간은 끝에 있음)
-    var gcodeLines = gcode.split('\n');
-    var gcodeEndComments = gcodeLines
-      .filter(function(l){ return l.trim().startsWith(';'); })
-      .slice(-40)
-      .join('\n');
-    console.log('[Kiri gcode end comments]\n' + gcodeEndComments);
-
     var filamentMm = parseKiriFilament(gcode);
     var printSec   = parseKiriTime(gcode);
 
@@ -1200,6 +1192,7 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct, on
 
 function parseKiriFilament(gcode){
   var patterns = [
+    /;\s*-+\s*filament used[^\d]*([\d.]+)\s*mm/i,
     /;\s*filament used[^\d]*([\d.]+)\s*mm/i,
     /;\s*plastic used[^\d]*([\d.]+)\s*mm/i,
     /;\s*total filament[^\d]*([\d.]+)\s*mm/i,
@@ -1213,20 +1206,18 @@ function parseKiriFilament(gcode){
 }
 
 function parseKiriTime(gcode){
-  var match = gcode.match(/;\s*(?:print|estimated|total)\s*time[^0-9]*(\d+)h\s*(\d+)m\s*(\d+)s/i);
-  if(match){
-    return parseInt(match[1], 10)*3600 + parseInt(match[2], 10)*60 + parseInt(match[3], 10);
-  }
+  // ; --- print time: 2486s --- 형식
+  var match = gcode.match(/;\s*-*\s*print time[^\d]*(\d+)s\s*-*/i);
+  if(match) return parseInt(match[1]);
+  // h m s 형식
+  match = gcode.match(/;\s*(?:print|estimated)\s*time[^0-9]*(\d+)h\s*(\d+)m\s*(\d+)s/i);
+  if(match) return parseInt(match[1])*3600 + parseInt(match[2])*60 + parseInt(match[3]);
+  // hh:mm:ss 형식
   match = gcode.match(/;\s*(?:print|estimated|total)\s*time[^0-9]*(\d+):(\d+):(\d+)/i);
-  if(match){
-    return parseInt(match[1], 10)*3600 + parseInt(match[2], 10)*60 + parseInt(match[3], 10);
-  }
-  match = gcode.match(/;\s*(?:print|estimated|total)\s*time[^0-9]*(\d+)m\s*(\d+)s/i);
-  if(match){
-    return parseInt(match[1], 10)*60 + parseInt(match[2], 10);
-  }
-  match = gcode.match(/;\s*time\s*[=:]\s*(\d+)/i);
-  if(match) return parseInt(match[1], 10);
+  if(match) return parseInt(match[1])*3600 + parseInt(match[2])*60 + parseInt(match[3]);
+  // m s 형식
+  match = gcode.match(/;\s*(?:print|estimated)\s*time[^0-9]*(\d+)m\s*(\d+)s/i);
+  if(match) return parseInt(match[1])*60 + parseInt(match[2]);
   return null;
 }
 
