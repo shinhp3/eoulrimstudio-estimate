@@ -730,6 +730,8 @@ var CONFIG = {
     firstSliceHeight:  0.2
   },
   KIRI_SLICE_TIMEOUT_MS: 120000,
+  // GitHub Pages + cross-origin worker 환경에서는 minion 병렬 워커가 응답을 멈추는 경우가 있어 기본 비활성화
+  KIRI_THREADED: false,
   // Kiri:Moto → P1S 보정계수 (실측 데이터로 추후 튜닝)
   P1S_FILAMENT_FACTOR: 1.0,
   P1S_TIME_FACTOR:     1.0,
@@ -960,7 +962,20 @@ window.ensureKiriEngine = function(){
 
 function kiriProgressMessage(msg){
   if(!msg) return "Kiri 처리 중…";
-  if(msg.slice) return "레이어 슬라이싱…";
+  if(msg.slice){
+    var slice = msg.slice;
+    if(slice.error) return "슬라이싱 오류";
+    if(slice.done) return "슬라이싱 완료";
+    if(slice.update != null){
+      var label = "레이어 슬라이싱 " + Math.round(slice.update * 100) + "%";
+      return slice.updateStatus ? label + " · " + slice.updateStatus : label;
+    }
+    if(slice.index != null && slice.slices){
+      return "슬라이스 전송 " + Math.round((slice.index + 1) / slice.slices * 100) + "%";
+    }
+    if(slice.slices) return "슬라이스 " + slice.slices + "개 정리 중";
+    return "레이어 슬라이싱…";
+  }
   if(msg.prepare && msg.prepare.update != null){
     return "경로 생성 " + Math.round(msg.prepare.update * 100) + "%";
   }
@@ -982,7 +997,7 @@ function withKiriTimeout(promise, label){
 window.createKiriEngine = async function(){
   await window.ensureKiriEngine();
   var engine = window.kiriNewEngine();
-  engine.setController({ threaded: true });
+  engine.setController({ threaded: CONFIG.KIRI_THREADED === true });
   engine.setListener(function(msg){
     var note = kiriProgressMessage(msg);
     if(window.isStlEstimateDebug && window.isStlEstimateDebug()){
@@ -1002,7 +1017,16 @@ window.reportKiriSliceProgress = function(msg, note){
   } else if(msg && msg.export){
     pct = 88;
   } else if(msg && msg.slice){
-    pct = 42;
+    var slice = msg.slice;
+    if(slice.update != null){
+      pct = 30 + slice.update * 22;
+    } else if(slice.index != null && slice.slices){
+      pct = 50 + ((slice.index + 1) / Math.max(slice.slices, 1)) * 2;
+    } else if(slice.done){
+      pct = 52;
+    } else {
+      pct = 31;
+    }
   }
   if(typeof window.reportEstimateProgress === "function"){
     window.reportEstimateProgress({ pct: pct, step: note || "Kiri 처리 중…" });
@@ -1038,7 +1062,11 @@ window.estimateFromSTL = async function(volMm3, bbox, stlArrayBuffer, infPct, on
   }
 
   try {
-    recordStlDebug({ source: "slicing", message: "Kiri 시작…" });
+    recordStlDebug({
+      source: "slicing",
+      message: "Kiri 시작…",
+      threaded: CONFIG.KIRI_THREADED === true
+    });
     prog(12, "슬라이서 준비 중");
 
     var engine = await window.createKiriEngine();
